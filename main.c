@@ -66,10 +66,6 @@ int main(void)
 		refresh();
 	}
 
-	printw("PRESS ANY KEY TO EXIT");
-	getch();
-	endwin();
-
 	return 0;
 }
 
