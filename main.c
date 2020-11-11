@@ -31,7 +31,7 @@ typedef struct {
 
 int EXIT_CODE = 0;
 
-Actor player;
+Actor player = { .health = 20, .symbol = '@', .y = 0, .x = 0 };
 char command[COMMAND_SIZE];
 char *cmdptr = command;
 
@@ -57,11 +57,6 @@ int main(void)
 
 	*end++ = C_EXIT;
 	*end++ = C_MOVE;
-
-	player.y = 0;
-	player.x = 0;
-	player.symbol = '@';
-	player.health = 20;
 
 	while (1) {
 		while (getInput() < 0)
