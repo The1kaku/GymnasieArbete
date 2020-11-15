@@ -15,6 +15,20 @@ enum KEYS {
 	K_COMMAND = '/'
 };
 
+enum LEVEL {
+	L_WIDTH = 80,
+	L_HEIGHT = 80
+};
+
+typedef char Level[L_HEIGHT][L_WIDTH];
+
+typedef struct {
+	int y;
+	int x;
+	int height;
+	int width;
+} Camera;
+
 typedef struct {
 	char *str;
 	int (*fun)(int);
@@ -34,9 +48,16 @@ int EXIT_CODE = 0;
 Actor player = { .health = 20, .symbol = '@', .y = 0, .x = 0 };
 char command[COMMAND_SIZE];
 char *cmdptr = command;
+Level levelOne;
+Camera cameraOne = { .y = 5, .x = 5, .height = 20, .width = 20 };
 
+WINDOW* levelWin;
+WINDOW* playerWin;
+
+void displayLevel(const Level, const Camera);
 void displayActor(const Actor *a);
 void moveActor(Actor *a, const int dy, const int dx);
+int collideActor(const Actor *a, const int dy, const int dx);
 int getInput(void);
 char *sgetword(char *str);
 int parseCommand(const char *str);
@@ -58,12 +79,21 @@ int main(void)
 	*end++ = C_EXIT;
 	*end++ = C_MOVE;
 
+	for (int i = 0; i < L_HEIGHT; i++)
+		for (int j = 0; j < L_WIDTH; j++)
+			levelOne[i][j] = 'a' + i;
+	levelWin = newwin(20, 20, 4, 3);
+	playerWin = newwin(3, 20, 0, 0);
+
 	while (1) {
 		while (getInput() < 0)
 			;
-		clear();
+		wclear(levelWin);
+		wclear(playerWin);
+		displayLevel(levelOne, cameraOne);
 		displayActor(&player);
-		refresh();
+		wrefresh(levelWin);
+		wrefresh(playerWin);
 	}
 
 	return 0;
@@ -71,13 +101,35 @@ int main(void)
 
 void displayActor(const Actor *a)
 {
-	printw("Y:%d\tX:%d\nSYM:%c\nHP:%d\n", a->y, a->x, a->symbol, a->health);
+	wprintw(playerWin, "Y:%d\tX:%d\nSYM:%c\nHP:%d\tCOL:%c\n", a->y, a->x, a->symbol, a->health, collideActor(a, 0, 0));
+	mvwaddch(levelWin, a->y - cameraOne.y, a->x - cameraOne.x, a->symbol);
+}
+
+void displayLevel(const Level l, const Camera c)
+{
+	int i, j;
+	for (i = 0; i < c.y; i++)
+		;
+	wmove(levelWin, 0, 0);
+	for (; i < c.y + c.height; i++) {
+		for (j = 0; j < c.x; j++)
+			;
+		for (; j < c.x + c.width; j++)
+			waddch(levelWin, l[i][j]);
+	}
 }
 
 void moveActor(Actor *a, const int dy, const int dx)
 {
+	if (collideActor(a, dy, dx) == 'f')
+		return;
 	a->y += dy;
 	a->x += dx;
+}
+
+int collideActor(const Actor *a, const int dy, const int dx)
+{
+	return levelOne[a->y + dy][a->x + dx];
 }
 
 int getInput(void)
