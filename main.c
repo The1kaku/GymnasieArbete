@@ -48,14 +48,14 @@ int EXIT_CODE = 0;
 Actor player = { .health = 20, .symbol = '@', .y = 0, .x = 0 };
 char command[COMMAND_SIZE];
 char *cmdptr = command;
-Level levelOne;
-Camera cameraOne = { .y = 5, .x = 5, .height = 20, .width = 20 };
+Level activeLevel;
+Camera activeCamera = { .y = 5, .x = 5, .height = 20, .width = 20 };
 
 WINDOW* levelWin;
 WINDOW* playerWin;
 
 void displayLevel(const Level, const Camera);
-void displayActor(const Actor *a);
+void displayPlayer(const Actor *a);
 void moveActor(Actor *a, const int dy, const int dx);
 int collideActor(const Actor *a, const int dy, const int dx);
 int getInput(void);
@@ -81,7 +81,7 @@ int main(void)
 
 	for (int i = 0; i < L_HEIGHT; i++)
 		for (int j = 0; j < L_WIDTH; j++)
-			levelOne[i][j] = 'a' + i;
+			activeLevel[i][j] = 'a' + i;
 	levelWin = newwin(20, 20, 4, 3);
 	playerWin = newwin(3, 20, 0, 0);
 
@@ -90,8 +90,8 @@ int main(void)
 			;
 		wclear(levelWin);
 		wclear(playerWin);
-		displayLevel(levelOne, cameraOne);
-		displayActor(&player);
+		displayLevel(activeLevel, activeCamera);
+		displayPlayer(&player);
 		wrefresh(levelWin);
 		wrefresh(playerWin);
 	}
@@ -99,10 +99,10 @@ int main(void)
 	return 0;
 }
 
-void displayActor(const Actor *a)
+void displayPlayer(const Actor *a)
 {
 	wprintw(playerWin, "Y:%d\tX:%d\nSYM:%c\nHP:%d\tCOL:%c\n", a->y, a->x, a->symbol, a->health, collideActor(a, 0, 0));
-	mvwaddch(levelWin, a->y - cameraOne.y, a->x - cameraOne.x, a->symbol);
+	mvwaddch(levelWin, a->y - activeCamera.y, a->x - activeCamera.x, a->symbol);
 }
 
 void displayLevel(const Level l, const Camera c)
@@ -129,7 +129,7 @@ void moveActor(Actor *a, const int dy, const int dx)
 
 int collideActor(const Actor *a, const int dy, const int dx)
 {
-	return levelOne[a->y + dy][a->x + dx];
+	return activeLevel[a->y + dy][a->x + dx];
 }
 
 int getInput(void)
