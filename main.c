@@ -49,7 +49,7 @@ Actor player = { .health = 20, .symbol = '@', .y = 0, .x = 0 };
 char command[COMMAND_SIZE];
 char *cmdptr = command;
 Level activeLevel;
-Camera activeCamera = { .y = 5, .x = 5, .height = 20, .width = 20 };
+Camera activeCamera = { .y = 0, .x = 0, .height = 20, .width = 20 };
 
 WINDOW* levelWin;
 WINDOW* playerWin;
@@ -59,6 +59,7 @@ void displayPlayer(const Actor *a);
 void moveActor(Actor *a, const int dy, const int dx);
 int collideActor(const Actor *a, const int dy, const int dx);
 int getInput(void);
+int readLevelFromFile(const char *file);
 char *sgetword(char *str);
 int parseCommand(const char *str);
 int exitCommand(int time);
@@ -76,12 +77,15 @@ int main(void)
 	cbreak();
 	noecho();
 
+	endwin();
 	*end++ = C_EXIT;
 	*end++ = C_MOVE;
 
-	for (int i = 0; i < L_HEIGHT; i++)
-		for (int j = 0; j < L_WIDTH; j++)
-			activeLevel[i][j] = 'a' + i;
+	if (readLevelFromFile("level.txt") < 0) {
+		printf("Error reading file");
+		return -1;
+	}
+
 	levelWin = newwin(20, 20, 4, 3);
 	playerWin = newwin(3, 20, 0, 0);
 
@@ -163,6 +167,29 @@ int getInput(void)
 		break;
 	default:
 		return -1;
+	}
+	return 0;
+}
+
+int readLevelFromFile(const char *file)
+{
+	FILE *in = fopen(file, "r");
+	char *emptyRow = (char *) calloc(L_WIDTH, sizeof(char));
+	for (int i = 0; i < L_WIDTH; i++)
+		emptyRow[i] = ' ';
+
+	if (in == NULL)
+		return -1;
+
+	for (int i = 0; i < L_HEIGHT; i++) {
+		if (fgets(&activeLevel[i][0], L_WIDTH, in) != NULL) {
+			strncpy(strchr(activeLevel[i], '\n'), emptyRow, L_WIDTH - strlen(activeLevel[i]));
+		} else {
+			strcpy(activeLevel[i], emptyRow);
+			/*for (char *begin = activeLevel[i], *end = &activeLevel[i][L_WIDTH-1]; begin < end; begin++)
+				*begin = ' ';
+				*/
+		}
 	}
 	return 0;
 }
