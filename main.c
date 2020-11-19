@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#define MAX_MONSTERS 10
 #define COMMAND_SIZE 1000
 #define COMMAND_BUF_SIZE 100
 
@@ -46,6 +47,7 @@ typedef struct {
 int EXIT_CODE = 0;
 
 Actor player = { .health = 20, .symbol = '@', .y = 0, .x = 0 };
+Actor *activeMonsters[MAX_MONSTERS];
 char command[COMMAND_SIZE];
 char *cmdptr = command;
 Level activeLevel;
@@ -56,14 +58,18 @@ WINDOW* playerWin;
 
 void displayLevel(const Level, const Camera);
 void displayPlayer(const Actor *a);
+void displayActor(const Actor *a);
+void displayMonsters(void);
 void moveActor(Actor *a, const int dy, const int dx);
 int collideActor(const Actor *a, const int dy, const int dx);
+int **getRoomBorders(const Actor *a);
 int getInput(void);
 int readLevelFromFile(const char *file);
 char *sgetword(char *str);
 int parseCommand(const char *str);
 int exitCommand(int time);
 int moveCommand(int time);
+int processAis(int time);
 
 Command C_EXIT = { "exit", &exitCommand, 0 };
 Command C_MOVE = { "move", &moveCommand, 10 };
@@ -73,6 +79,7 @@ Command *end = &activeCommands[0];
 
 int main(void) 
 {
+	int time;
 	initscr();
 	cbreak();
 	noecho();
@@ -89,12 +96,17 @@ int main(void)
 	levelWin = newwin(20, 20, 4, 3);
 	playerWin = newwin(3, 20, 0, 0);
 
+	Actor undead = { .health = 20, .symbol = 'U', .y = 5, .x = 5 };
+	activeMonsters[0] = &undead;
+
 	while (1) {
-		while (getInput() < 0)
+		while ((time = getInput()) < 0)
 			;
+		processAis(time);
 		wclear(levelWin);
 		wclear(playerWin);
 		displayLevel(activeLevel, activeCamera);
+		displayMonsters();
 		displayPlayer(&player);
 		wrefresh(levelWin);
 		wrefresh(playerWin);
@@ -105,7 +117,13 @@ int main(void)
 
 void displayPlayer(const Actor *a)
 {
-	wprintw(playerWin, "Y:%d\tX:%d\nSYM:%c\nHP:%d\tCOL:%c\n", a->y, a->x, a->symbol, a->health, collideActor(a, 0, 0));
+	int **room = getRoomBorders(a);
+	wprintw(playerWin, "Y:%d\tX:%d\tROOM:{%d,%d}to{%d,%d}\nSYM:%c\nHP:%d\tCOL:%c\n", a->y, a->x, room[0][0], room[0][1], room[1][0], room[1][1], a->symbol, a->health, collideActor(a, 0, 0));
+	displayActor(a);
+}
+
+void displayActor(const Actor *a)
+{
 	mvwaddch(levelWin, a->y - activeCamera.y, a->x - activeCamera.x, a->symbol);
 }
 
@@ -123,6 +141,14 @@ void displayLevel(const Level l, const Camera c)
 	}
 }
 
+void displayMonsters(void)
+{
+	for (int i = 0; i < MAX_MONSTERS; i++)
+		if (activeMonsters[i] != NULL && isalpha(activeMonsters[i]->symbol)) {
+			displayActor(activeMonsters[i]);
+		}
+}
+
 void moveActor(Actor *a, const int dy, const int dx)
 {
 	if (collideActor(a, dy, dx) == 'f')
@@ -136,39 +162,93 @@ int collideActor(const Actor *a, const int dy, const int dx)
 	return activeLevel[a->y + dy][a->x + dx];
 }
 
+int **getRoomBorders(const Actor *a)
+{
+	int **ret;
+	ret = (int **) malloc(2 * sizeof(int*));
+	for (int i = 0; i < 2; i++)
+		ret[i] = (int *) malloc(2 * sizeof(int));
+
+	for (int i = 0; i < 2; i++)
+		for (int j = 0; j < 2; j++)
+			ret[i][j] = -1;
+	if (activeLevel[a->y][a->x] != '.')
+		return ret;
+
+	int i, j;
+	for (i = a->y; i > 0; i--)
+		if (activeLevel[i][a->x] != '.') {
+			--i;
+			break;
+		}
+	for (j = a->x; j > 0; j--)
+		if (activeLevel[a->y][j] != '.') {
+			--j;
+			break;
+		}
+	ret[0][0] = i;
+	ret[0][1] = j;
+
+	for (i = a->y; i < L_HEIGHT; i++)
+		if (activeLevel[i][a->x] != '.') {
+			break;
+		}
+	for (j = a->x; j < L_WIDTH; j++)
+		if (activeLevel[a->y][j] != '.') {
+			break;
+		}
+	ret[1][0] = i;
+	ret[1][1] = j;
+
+	return ret;
+}
+
 int getInput(void)
 {
-	int c = getch();
+	int t, c = getch();
+	char cmd[COMMAND_SIZE];
+	t = 0;
 	
 	switch(c) {
 	case K_UP:
-		moveActor(&player, -1, 0);
-		break;
+		strcpy(cmd, "up 1");
+		cmdptr = cmd;
+		t = moveCommand(C_MOVE.time);
+		cmdptr = command;
+		return t;
 	case K_RIGHT:
-		moveActor(&player, 0, 1);
-		break;
+		strcpy(cmd, "right 1");
+		cmdptr = cmd;
+		t = moveCommand(C_MOVE.time);
+		cmdptr = command;
+		return t;
 	case K_LEFT:
-		moveActor(&player, 0, -1);
-		break;
+		strcpy(cmd, "left 1");
+		cmdptr = cmd;
+		t = moveCommand(C_MOVE.time);
+		cmdptr = command;
+		return t;
 	case K_DOWN:
-		moveActor(&player, 1, 0);
-		break;
+		strcpy(cmd, "down 1");
+		cmdptr = cmd;
+		t = moveCommand(C_MOVE.time);
+		cmdptr = command;
+		return t;
 	case K_EXIT:
 		exitCommand(0);
-		break;
+		return t;
 	case K_COMMAND:
 		nocbreak();
 		echo();
 		addch('/');
 		getstr(command);
-		parseCommand(sgetword(cmdptr = command));
+		t = parseCommand(sgetword(cmdptr = command));
 		noecho();
 		cbreak();
-		break;
+		return t;
 	default:
-		return -1;
+		return 0;
 	}
-	return 0;
 }
 
 int readLevelFromFile(const char *file)
@@ -186,9 +266,6 @@ int readLevelFromFile(const char *file)
 			strncpy(strchr(activeLevel[i], '\n'), emptyRow, L_WIDTH - strlen(activeLevel[i]));
 		} else {
 			strcpy(activeLevel[i], emptyRow);
-			/*for (char *begin = activeLevel[i], *end = &activeLevel[i][L_WIDTH-1]; begin < end; begin++)
-				*begin = ' ';
-				*/
 		}
 	}
 	return 0;
@@ -266,4 +343,32 @@ int moveCommand(int time)
 		}
 
 	return delta * time;
+}
+
+int processAi(Actor *a, int time);
+
+int processAis(int time)
+{
+	int **room = getRoomBorders(&player);
+	for (int i = 0; i < MAX_MONSTERS; i++) {
+		if (activeMonsters[i] == NULL)
+			continue;
+		if (activeMonsters[i]->y > room[0][0] && activeMonsters[i]->y < room[1][0] && activeMonsters[i]->x > room[0][1] && activeMonsters[i]->x < room[1][0])
+			processAi(activeMonsters[i], time);
+	}
+	return 0;
+}
+
+int processAi(Actor *a, int time)
+{
+	int dy, dx;
+	dy = player.y - a->y;
+	dx = player.x - a->x;
+	if (abs(dy) + abs(dx) <= 1)
+		return 0;
+	if (abs(dy) > abs(dx))
+		moveActor(a, (dy > 0) ? 1 : -1, 0);
+	else 
+		moveActor(a, 0, (dx > 0) ? 1 : -1);
+	return 0;
 }
