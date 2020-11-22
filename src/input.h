@@ -7,7 +7,7 @@
 
 #define COMMAND_SIZE 80
 
-enum {
+enum KEYS {
     KEY_MOVE_UP = 'w',
     KEY_MOVE_RIGHT = 's',
     KEY_MOVE_DOWN = 'r',

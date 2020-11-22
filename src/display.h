@@ -4,6 +4,7 @@
 #include <curses.h>
 
 #include "actor.h"
+#include "items.h"
 #include "level.h"
 
 static struct {
@@ -34,6 +35,7 @@ void focusCameraOnPosition(const int y, const int x);
 void setCamera(const int y, const int x);
  
 void addActor(const Actor *a);
+void addItem(const Item *i);
 void addLevel(const Level l);
 void addCamera(void);
 

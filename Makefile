@@ -14,6 +14,7 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
+	-@echo "***************** Done ******************"
 
 # c source
 $(BUILD_DIR)/%.c.o: %.c
