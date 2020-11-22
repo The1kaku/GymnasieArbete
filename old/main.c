@@ -42,14 +42,18 @@ typedef struct {
 	int symbol;
 	int y;
 	int x;
+	int attack;
+	int attackSpeed;
 } Actor;
 
 int EXIT_CODE = 0;
 
-Actor player = { .health = 20, .symbol = '@', .y = 0, .x = 0 };
+Actor player = { .health = 20, .symbol = '@', .y = 1, .x = 1, .attack = 2, .attackSpeed = 10 };
 Actor *activeMonsters[MAX_MONSTERS];
+Actor **activeMonstersPtr = activeMonsters;
 char command[COMMAND_SIZE];
 char *cmdptr = command;
+char resetCommand[COMMAND_SIZE];
 Level activeLevel;
 Camera activeCamera = { .y = 0, .x = 0, .height = 20, .width = 20 };
 
@@ -61,6 +65,7 @@ void displayPlayer(const Actor *a);
 void displayActor(const Actor *a);
 void displayMonsters(void);
 void moveActor(Actor *a, const int dy, const int dx);
+void attackActor(Actor *a, const int y, const int x);
 int collideActor(const Actor *a, const int dy, const int dx);
 int **getRoomBorders(const Actor *a);
 int getInput(void);
@@ -69,10 +74,12 @@ char *sgetword(char *str);
 int parseCommand(const char *str);
 int exitCommand(int time);
 int moveCommand(int time);
+int attackCommand(int time);
 int processAis(int time);
 
 Command C_EXIT = { "exit", &exitCommand, 0 };
 Command C_MOVE = { "move", &moveCommand, 10 };
+Command C_ATTACK = { "attack", &attackCommand, 1 };
 
 Command activeCommands[COMMAND_BUF_SIZE];
 Command *end = &activeCommands[0];
@@ -87,6 +94,9 @@ int main(void)
 	endwin();
 	*end++ = C_EXIT;
 	*end++ = C_MOVE;
+	*end++ = C_ATTACK;
+
+	resetCommand[0] = '\0';
 
 	if (readLevelFromFile("level.txt") < 0) {
 		printf("Error reading file");
@@ -96,8 +106,12 @@ int main(void)
 	levelWin = newwin(20, 20, 4, 3);
 	playerWin = newwin(3, 20, 0, 0);
 
-	Actor undead = { .health = 20, .symbol = 'U', .y = 5, .x = 5 };
-	activeMonsters[0] = &undead;
+	Actor undead = { .health = 20, .symbol = 'U', .y = 5, .x = 5, .attack = 1, .attackSpeed = 10 };
+	*activeMonstersPtr++ = &undead;
+
+	while (activeMonstersPtr < &activeMonsters[MAX_MONSTERS])
+		*activeMonstersPtr++ = NULL;
+	endwin();
 
 	while (1) {
 		while ((time = getInput()) < 0)
@@ -151,15 +165,52 @@ void displayMonsters(void)
 
 void moveActor(Actor *a, const int dy, const int dx)
 {
-	if (collideActor(a, dy, dx) == 'f')
+	int i;
+	switch((i = collideActor(a, dy, dx)))
+	{
+		case 0:
+			a->y += dy;
+			a->x += dx;
+			return;
+		case 1:
+			return;
+		case 2:
+			player.health -= a->attack;
+			return;
+		default:
+			if (a == &player)
+				activeMonsters[i]->health -= player.attack;
+			return;
+	}
+}
+
+void attackActor(Actor *a, const int y, const int x)
+{
+	if (a == &player) {
+		for (int i = 0; i < MAX_MONSTERS; i++)
+			if (activeMonsters[i] != NULL)
+				if (activeMonsters[i]->y == y && activeMonsters[i]->x == x)
+					activeMonsters[i]->health += -player.attack;
 		return;
-	a->y += dy;
-	a->x += dx;
+	} else {
+		if (player.y == y && player.x == x)
+			player.health += -a->attack;
+		return;
+	}
 }
 
 int collideActor(const Actor *a, const int dy, const int dx)
 {
-	return activeLevel[a->y + dy][a->x + dx];
+	if (a->y+dy == player.y && a->x+dx == player.x)
+		return 2;
+	for (int i = 0; i < MAX_MONSTERS; i++) {
+		if (activeMonsters[i] == NULL)
+			continue;
+		if (a->y+dy == activeMonsters[i]->y && a->x+dx == activeMonsters[i]->x) {
+			return 2+i;
+		}
+	}
+	return activeLevel[a->y + dy][a->x + dx] == '#';
 }
 
 int **getRoomBorders(const Actor *a)
@@ -293,6 +344,7 @@ int parseCommand(const char *str)
 	for (begin = &activeCommands[0]; begin != end; begin++)
 		if (strcmp(str, begin->str) == 0) {
 			cbreak();
+
 			return (begin->fun)(begin->time);
 		}
 	return -1;
@@ -345,6 +397,42 @@ int moveCommand(int time)
 	return delta * time;
 }
 
+int attackCommand(int time)
+{
+	int dir;
+	char *directions[4] = {
+		"left",
+		"right",
+		"up",
+		"down"
+	};
+
+	char *dirstr = sgetword(cmdptr);
+	for (dir = 0; dir < 4; dir++) {
+		if (strcmp(dirstr, directions[dir]) == 0) {
+			break;
+		}
+	}
+
+	if (dir < 4)
+		switch (dir) {
+		case 0:
+			attackActor(&player, player.y, player.x-1);
+			break;
+		case 1:
+			attackActor(&player, player.y, player.x+1);
+			break;
+		case 2:
+			attackActor(&player, player.y-1, player.x);
+			break;
+		case 3:
+			attackActor(&player, player.y+1, player.x);
+			break;
+		}
+
+	return time * player.attackSpeed;
+}
+
 int processAi(Actor *a, int time);
 
 int processAis(int time)
@@ -353,6 +441,10 @@ int processAis(int time)
 	for (int i = 0; i < MAX_MONSTERS; i++) {
 		if (activeMonsters[i] == NULL)
 			continue;
+		if (activeMonsters[i]->health <= 0) {
+			activeMonsters[i] = NULL;
+			continue;
+		}
 		if (activeMonsters[i]->y > room[0][0] && activeMonsters[i]->y < room[1][0] && activeMonsters[i]->x > room[0][1] && activeMonsters[i]->x < room[1][0])
 			processAi(activeMonsters[i], time);
 	}
