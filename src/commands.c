@@ -1,17 +1,34 @@
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include "commands.h"
 #include "display.h"
 #include "main.h"
+
+static int *
+generateArgs(int argc, ...)
+{
+    va_list args_list;
+    int *args;
+
+    va_start(args_list, argc);
+
+    args = (int *) malloc(argc * sizeof(int));
+    for (int i = 0; i < argc; i++) {
+        args[i] = va_arg(args_list, int);
+    }
+
+    va_end(args_list);
+
+    return args;
+}
 
 int 
 moveRightCommand(Actor *a, int *args, int argc)
 {
     free(args);
     argc = 2;
-    args = malloc(argc * sizeof(int));
-    args[0] =  0;
-    args[1] =  1;
+    args = generateArgs(argc, 0, 1);
     return moveCommand(a, args, argc);
 }
 
@@ -20,9 +37,7 @@ moveLeftCommand(Actor *a, int *args, int argc)
 {
     free(args);
     argc = 2;
-    args = malloc(argc * sizeof(int));
-    args[0] =  0;
-    args[1] = -1;
+    args = generateArgs(argc, 0, -1);
     return moveCommand(a, args, argc);
 }
 
@@ -31,9 +46,7 @@ moveDownCommand(Actor *a, int *args, int argc)
 {
     free(args);
     argc = 2;
-    args = malloc(argc * sizeof(int));
-    args[0] =  1;
-    args[1] =  0;
+    args = generateArgs(argc, 1, 0);
     return moveCommand(a, args, argc);
 }
 
@@ -42,9 +55,7 @@ moveUpCommand(Actor *a, int *args, int argc)
 {
     free(args);
     argc = 2;
-    args = malloc(argc * sizeof(int));
-    args[0] = -1;
-    args[1] =  0;
+    args = generateArgs(argc, -1, 0);
     return moveCommand(a, args, argc);
 }
 
@@ -64,27 +75,27 @@ moveCommand(Actor *a, int *args, int argc)
 
 int attackmoveRightCommand(Actor *a, int *args, int argc)
 {
-    moveRightCommand(a, args, argc);
+    return moveRightCommand(a, args, argc);
 }
 
 int attackmoveLeftCommand(Actor *a, int *args, int argc)
 {
-    moveLeftCommand(a, args, argc);
+    return moveLeftCommand(a, args, argc);
 }
 
 int attackmoveDownCommand(Actor *a, int *args, int argc)
 {
-    moveDownCommand(a, args, argc);
+    return moveDownCommand(a, args, argc);
 }
 
 int attackmoveUpCommand(Actor *a, int *args, int argc)
 {
-    moveUpCommand(a, args, argc);
+    return moveUpCommand(a, args, argc);
 }
 
 int attackmoveCommand(Actor *a, int *args, int argc)
 {
-    moveCommand(a, args, argc);
+    return moveCommand(a, args, argc);
 }
 
 int 
