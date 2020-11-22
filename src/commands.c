@@ -62,6 +62,31 @@ moveCommand(Actor *a, int *args, int argc)
     return a->speed;
 }
 
+int attackmoveRightCommand(Actor *a, int *args, int argc)
+{
+    moveRightCommand(a, args, argc);
+}
+
+int attackmoveLeftCommand(Actor *a, int *args, int argc)
+{
+    moveLeftCommand(a, args, argc);
+}
+
+int attackmoveDownCommand(Actor *a, int *args, int argc)
+{
+    moveDownCommand(a, args, argc);
+}
+
+int attackmoveUpCommand(Actor *a, int *args, int argc)
+{
+    moveUpCommand(a, args, argc);
+}
+
+int attackmoveCommand(Actor *a, int *args, int argc)
+{
+    moveCommand(a, args, argc);
+}
+
 int 
 exitCommand(Actor *a, int *args, int argc)
 {

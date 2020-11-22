@@ -16,13 +16,13 @@ readKeyInput(Actor *p)
 
     switch (c) {
         case KEY_MOVE_UP:
-            return moveUpCommand(p, NULL, 0);
+            return attackmoveUpCommand(p, NULL, 0);
         case KEY_MOVE_RIGHT:
-            return moveRightCommand(p, NULL, 0);
+            return attackmoveRightCommand(p, NULL, 0);
         case KEY_MOVE_DOWN:
-            return moveDownCommand(p, NULL, 0);
+            return attackmoveDownCommand(p, NULL, 0);
         case KEY_MOVE_LEFT:
-            return moveLeftCommand(p, NULL, 0);
+            return attackmoveLeftCommand(p, NULL, 0);
         case KEY_TEXT_MODE:
             return readTextInput(p);
         case KEY_EXIT_GAME:
@@ -40,7 +40,7 @@ readTextInput(Actor *p)
     echo();
     nocbreak();
     mvwaddch(textWin, 0, 0, '/');
-    
+
     wgetstr(textWin, str);
 
     T = 1;
