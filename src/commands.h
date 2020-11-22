@@ -19,7 +19,7 @@ int moveCommand(Actor *a, int *args, int argc);
 // Exiting
 int exitCommand(Actor *a, int *args, int argc);
 
-static Command commands[] = {
+static Command __attribute__((unused)) commands[] = {
     { "move right", 1, &moveRightCommand },
     { "move left", 1, &moveLeftCommand },
     { "move down", 1, &moveDownCommand },

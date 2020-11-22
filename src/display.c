@@ -11,9 +11,11 @@ initDisplay(void)
     refresh();
 
     noecho();
+    cbreak();
 
-    levelWin = newwin(LEVEL_WIN_HEIGHT, LEVEL_WIN_WIDTH, 5, 0);
     playerWin = newwin(PLAYER_WIN_HEIGHT, PLAYER_WIN_WIDTH, 0, 0);
+    levelWin = newwin(LEVEL_WIN_HEIGHT, LEVEL_WIN_WIDTH, 5, 0);
+    textWin = newwin(TEXT_WIN_HEIGHT, TEXT_WIN_WIDTH, 26, 0);
 
     camera.y = camera.x = 0;
 }
@@ -21,8 +23,9 @@ initDisplay(void)
 void 
 clearDisplay(void)
 {
-    wclear(levelWin);
     wclear(playerWin);
+    wclear(levelWin);
+    wclear(textWin);
 }
 
 void 
@@ -30,6 +33,7 @@ refreshDisplay(void)
 {
     wrefresh(levelWin);
     wrefresh(playerWin);
+    wrefresh(textWin);
 }
 
 void 
@@ -37,6 +41,7 @@ deleteDisplay(void)
 {
     delwin(levelWin);
     delwin(playerWin);
+    delwin(textWin);
 }
 
 void 

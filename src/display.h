@@ -9,17 +9,20 @@
 static struct {
     int y;
     int x;
-} camera;
+} camera __attribute__((unused));
 
 enum {
     LEVEL_WIN_HEIGHT = 20,
     LEVEL_WIN_WIDTH = 60,
     PLAYER_WIN_HEIGHT = 5,
-    PLAYER_WIN_WIDTH = 40
+    PLAYER_WIN_WIDTH = 40,
+    TEXT_WIN_HEIGHT = 2,
+    TEXT_WIN_WIDTH = 50
 };
 
-WINDOW* levelWin;
 WINDOW* playerWin;
+WINDOW* levelWin;
+WINDOW* textWin;
 
 void initDisplay(void);
 void clearDisplay(void);

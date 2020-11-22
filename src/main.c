@@ -27,7 +27,7 @@ main(void)
         addActor(player);
         addCamera();
         refreshDisplay();
-    } while (readInput(player) >= 0);
+    } while (readKeyInput(player) >= 0);
 
     deleteDisplay();
     endwin();
