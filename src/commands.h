@@ -9,6 +9,9 @@ typedef struct Command {
     int (*fun)(Actor *a, int *args, int argc);
 } Command;
 
+// Utils
+int *generateArgs(int argc, ...);
+
 // Movement
 int moveRightCommand(Actor *a, int *args, int argc);
 int moveLeftCommand(Actor *a, int *args, int argc);

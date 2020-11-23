@@ -7,8 +7,9 @@
 #define LEVEL_WIDTH 100
 
 typedef char **Level;
+typedef int **Room;
 
-char **readLevelFromFile(const char *f);
+Level readLevelFromFile(const char *f);
 
 int **getRoomBordersFromActor(const Level l, const Actor *a);
 int **getRoomBordersFromPoint(const Level l, const int y, const int x);

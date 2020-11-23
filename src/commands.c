@@ -5,7 +5,7 @@
 #include "display.h"
 #include "main.h"
 
-static int *
+int *
 generateArgs(int argc, ...)
 {
     va_list args_list;

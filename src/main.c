@@ -6,6 +6,7 @@
 #include "input.h"
 #include "commands.h"
 #include "items.h"
+#include "ai.h"
 
 int 
 main(void)
@@ -22,7 +23,7 @@ main(void)
     groundItems[0] = &isword;   
 
     player = createActor(1, 1, 20, '@', 1, &fists, &naked, -1);
-    undead = createActor(8, 8, 20, 'U', 1, &sword, &naked, 0);
+    undead = createActor(8, 8, 20, 'U', 1, &sword, &naked, 1);
 
     monsters[0] = undead;
 
@@ -33,6 +34,9 @@ main(void)
     initDisplay();
 
     do {
+        runAi();
+        if (player->health < 1)
+            break;
         clearDisplay();
         focusCameraOnActor(player);
         addLevel(level);
@@ -52,7 +56,7 @@ main(void)
                     addActor(monsters[i]);
                 }
             }
-        int **room = getRoomBordersFromActor(level, player);
+        Room room = getRoomBordersFromActor(level, player);
         wprintw(playerWin, "ROOM (%02d,%02d) to (%02d,%02d)", room[0][0], room[0][1], room[1][0], room[1][1]); 
         addActor(player);
         //addCamera();

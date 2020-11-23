@@ -5,7 +5,7 @@
 
 #include "level.h"
 
-char **
+Level
 readLevelFromFile(const char *f)
 {
     FILE *fp;
@@ -39,16 +39,17 @@ readLevelFromFile(const char *f)
     return level;
 }
 
-int **
+Room
 getRoomBordersFromActor(const Level l, const Actor *a)
 {
     return getRoomBordersFromPoint(l, a->y, a->x);
 }
 
-int **
+Room
 getRoomBordersFromPoint(const Level l, const int y, const int x)
 {
-    int i, j, **ret;
+    int i, j;
+    Room ret;
     ret = (int **) malloc(2 * sizeof(int*));
     ret[0] = (int *) malloc(2 * sizeof(int));
     ret[1] = (int *) malloc(2 * sizeof(int));
