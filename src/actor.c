@@ -9,6 +9,17 @@ moveActor(Actor *a, const int dy, const int dx)
     a->x += dx;
 }
 
+void
+attackActor(Actor *a, Actor *d)
+{
+    int damage;
+    damage = 0;
+    damage += a->weapon->impact / d->armour->impact;
+    damage += a->weapon->pierce / d->armour->pierce;
+    damage += a->weapon->slash / d->armour->slash;
+    d->health -= damage;
+}
+
 int 
 giveItemToActor(Actor *a, Item *i)
 {
@@ -25,7 +36,7 @@ giveItemToActor(Actor *a, Item *i)
 }
 
 Actor *
-createActor(const int y, const int x, const int health, const char symbol, const int speed, Weapon *weapon, Armour *armour)
+createActor(const int y, const int x, const int health, const char symbol, const int speed, Weapon *weapon, Armour *armour, const int aiType)
 {
     Actor *a;
     a = (Actor *) malloc(sizeof(Actor));
@@ -36,6 +47,7 @@ createActor(const int y, const int x, const int health, const char symbol, const
     a->speed = speed;
     a->armour = armour;
     a->weapon = weapon;
+    a->aiType = aiType;
 
     return a;
 }

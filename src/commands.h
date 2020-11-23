@@ -21,6 +21,8 @@ int attackmoveLeftCommand(Actor *a, int *args, int argc);
 int attackmoveDownCommand(Actor *a, int *args, int argc);
 int attackmoveUpCommand(Actor *a, int *args, int argc);
 int attackmoveCommand(Actor *a, int *args, int argc);
+// Attacking
+int attackCommand(Actor *a, int *args, int argc);
 
 // Exiting
 int exitCommand(Actor *a, int *args, int argc);

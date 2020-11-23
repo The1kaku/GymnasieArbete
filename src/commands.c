@@ -75,26 +75,55 @@ moveCommand(Actor *a, int *args, int argc)
 
 int attackmoveRightCommand(Actor *a, int *args, int argc)
 {
-    return moveRightCommand(a, args, argc);
+    free(args);
+    argc = 2;
+    args = generateArgs(argc, 0, 1);
+    return attackmoveCommand(a, args, argc);
 }
 
 int attackmoveLeftCommand(Actor *a, int *args, int argc)
 {
-    return moveLeftCommand(a, args, argc);
+    free(args);
+    argc = 2;
+    args = generateArgs(argc, 0, -1);
+    return attackmoveCommand(a, args, argc);
 }
 
 int attackmoveDownCommand(Actor *a, int *args, int argc)
 {
-    return moveDownCommand(a, args, argc);
+    free(args);
+    argc = 2;
+    args = generateArgs(argc, 1, 0);
+    return attackmoveCommand(a, args, argc);
 }
 
 int attackmoveUpCommand(Actor *a, int *args, int argc)
 {
-    return moveUpCommand(a, args, argc);
+    free(args);
+    argc = 2;
+    args = generateArgs(argc, -1, 0);
+    return attackmoveCommand(a, args, argc);
 }
 
 int attackmoveCommand(Actor *a, int *args, int argc)
 {
+    if (a->aiType == -1) {
+        for (int i = 0; i < MONSTER_COUNT; i++) {
+            if (monsters[i] == NULL)
+                return moveCommand(a, args, argc);
+            if (monsters[i]->y == a->y + args[0] && monsters[i]->x == a->x + args[1]) {
+                    attackActor(a, monsters[i]);
+                    return a->weapon->speed;
+            } else {
+                return moveCommand(a, args, argc);
+            }
+        }
+    }
+
+    if (a->y + args[0] == player->y && a->x + args[1] == player->x) {
+        attackActor(a, player);
+        return a->weapon->speed;
+    } 
     return moveCommand(a, args, argc);
 }
 

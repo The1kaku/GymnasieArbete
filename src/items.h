@@ -20,6 +20,7 @@ typedef struct Weapon {
     int slash;
     int impact;
     int durability;
+    int speed;
 } Weapon;
 
 typedef struct Armour {
