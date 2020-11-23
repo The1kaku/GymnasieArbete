@@ -67,8 +67,12 @@ moveCommand(Actor *a, int *args, int argc)
     dx = args[1];
     if (a->y+dy < 0 || a->y+dy >= LEVEL_HEIGHT || a->x+dx < 0 || a->x+dx >= LEVEL_WIDTH)
         return 0;
-    if (level[a->y+dy][a->x+dx] != '.')
+    if (level[a->y+dy][a->x+dx] == '#')
         return 0;
+    if (level[a->y+dy][a->x+dx] == ' ') {
+        a->health = 0;
+        return 0;
+    }
     moveActor(a, args[0], args[1]);
     return a->speed;
 }

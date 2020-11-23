@@ -38,3 +38,40 @@ readLevelFromFile(const char *f)
     }
     return level;
 }
+
+int **
+getRoomBordersFromActor(const Level l, const Actor *a)
+{
+    return getRoomBordersFromPoint(l, a->y, a->x);
+}
+
+int **
+getRoomBordersFromPoint(const Level l, const int y, const int x)
+{
+    int i, j, **ret;
+    ret = (int **) malloc(2 * sizeof(int*));
+    ret[0] = (int *) malloc(2 * sizeof(int));
+    ret[1] = (int *) malloc(2 * sizeof(int));
+    ret[0][0] = ret[0][1] = ret[1][0] = ret[1][1] = -1;
+
+    if (y < 0 || y > LEVEL_HEIGHT || x < 0 || x > LEVEL_WIDTH)
+        return ret;
+    if (l[y][x] == '#' || l[y][x] == ' ')
+        return ret;
+    
+    for (i = y; i > 0 && l[i][x] != '#'; i--)
+        ;
+    for (j = x; j > 0 && l[y][j] != '#'; j--)
+        ;
+    ret[0][0] = i;
+    ret[0][1] = j;
+
+    for (i = y; i < LEVEL_HEIGHT && l[i][x] != '#'; i++)
+        ;
+    for (j = x; j < LEVEL_WIDTH && l[y][j] != '#'; j++)
+        ;
+    ret[1][0] = i;
+    ret[1][1] = j;
+
+    return ret;
+}

@@ -17,7 +17,7 @@ main(void)
 
     Weapon fists = { "A pair of fists", 0, 0, 3, -1, 5 };
 
-    Armour naked = { "No armour", 1, 1, 1, -1 };
+    Armour naked = { "Unarmoured", 1, 1, 1, -1 };
 
     groundItems[0] = &isword;   
 
@@ -52,6 +52,8 @@ main(void)
                     addActor(monsters[i]);
                 }
             }
+        int **room = getRoomBordersFromActor(level, player);
+        wprintw(playerWin, "ROOM (%02d,%02d) to (%02d,%02d)", room[0][0], room[0][1], room[1][0], room[1][1]); 
         addActor(player);
         //addCamera();
         refreshDisplay();
