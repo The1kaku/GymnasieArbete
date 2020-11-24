@@ -3,6 +3,6 @@
 
 #include "actor.h"
 
-void chaserAi(Actor *a, Actor *p);
+int chaserAi(int T, Actor *a, Actor *p);
 
 #endif

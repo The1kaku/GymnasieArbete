@@ -15,20 +15,20 @@ readKeyInput(Actor *p)
     c = getch();
 
     switch (c) {
-        case KEY_MOVE_UP:
-            return attackmoveUpCommand(p, NULL, 0);
-        case KEY_MOVE_RIGHT:
-            return attackmoveRightCommand(p, NULL, 0);
-        case KEY_MOVE_DOWN:
-            return attackmoveDownCommand(p, NULL, 0);
-        case KEY_MOVE_LEFT:
-            return attackmoveLeftCommand(p, NULL, 0);
-        case KEY_TEXT_MODE:
-            return readTextInput(p);
-        case KEY_EXIT_GAME:
-            return exitCommand(NULL, NULL, 0);
-        default:
-            return 0;
+    case KEY_MOVE_UP:
+        return attackmoveUpCommand(p, NULL, 0);
+    case KEY_MOVE_RIGHT:
+        return attackmoveRightCommand(p, NULL, 0);
+    case KEY_MOVE_DOWN:
+        return attackmoveDownCommand(p, NULL, 0);
+    case KEY_MOVE_LEFT:
+        return attackmoveLeftCommand(p, NULL, 0);
+    case KEY_TEXT_MODE:
+        return readTextInput(p);
+    case KEY_EXIT_GAME:
+        return exitCommand(NULL, NULL, 0);
+    default:
+        return 0;
     }
 }
 
@@ -56,7 +56,7 @@ readTextInput(Actor *p)
     for (int i = 0; i < size; i++) {
         if (strcmp(sp, commands[i].str) == 0 && commands[i].playerCanUse > 0)
             for (int j = 0; j < T && j < 100; j++)
-                res = (*(commands[i].fun))(p, NULL, 0);
+                res += (*(commands[i].fun))(p, NULL, 0);
     }
 
     wmove(levelWin, 0, 0);

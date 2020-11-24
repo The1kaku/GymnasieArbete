@@ -7,8 +7,8 @@
 #include "actor.h"
 #include "commands.h"
 
-void
-chaserAi(Actor *a, Actor *p) 
+int
+chaserAi(int T, Actor *a, Actor *p) 
 {
     int dy, dx, *args, argc;
     dy = a->y - p->y;
@@ -19,5 +19,9 @@ chaserAi(Actor *a, Actor *p)
     } else { 
         args = generateArgs(argc, 0, -dx / abs(dx));  
     }
-    attackmoveCommand(a, args, argc);
+    if (T >= a->speed) {
+        return (T >= a->weapon->speed) ? attackmoveCommand(a, args, argc) : moveCommand(a, args, argc);
+    } else {
+        return (T >= a->weapon->speed) ? attackCommand(a, args, argc) : 0;
+    }
 }

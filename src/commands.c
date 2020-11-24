@@ -73,11 +73,21 @@ moveCommand(Actor *a, int *args, int argc)
         a->health = 0;
         return 0;
     }
+    if (a->y+dy == player->y && a->x+dx == player->x)
+        return 0;
+    for (int i = 0; i < MONSTER_COUNT; i++) {
+        if (monsters[i] == NULL)
+            continue;
+        if (a->y+dy == monsters[i]->y && a->x+dx == monsters[i]->x)
+            return 0;
+    }
+
     moveActor(a, args[0], args[1]);
     return a->speed;
 }
 
-int attackmoveRightCommand(Actor *a, int *args, int argc)
+int 
+attackmoveRightCommand(Actor *a, int *args, int argc)
 {
     free(args);
     argc = 2;
@@ -85,7 +95,8 @@ int attackmoveRightCommand(Actor *a, int *args, int argc)
     return attackmoveCommand(a, args, argc);
 }
 
-int attackmoveLeftCommand(Actor *a, int *args, int argc)
+int 
+attackmoveLeftCommand(Actor *a, int *args, int argc)
 {
     free(args);
     argc = 2;
@@ -93,7 +104,8 @@ int attackmoveLeftCommand(Actor *a, int *args, int argc)
     return attackmoveCommand(a, args, argc);
 }
 
-int attackmoveDownCommand(Actor *a, int *args, int argc)
+int 
+attackmoveDownCommand(Actor *a, int *args, int argc)
 {
     free(args);
     argc = 2;
@@ -101,7 +113,8 @@ int attackmoveDownCommand(Actor *a, int *args, int argc)
     return attackmoveCommand(a, args, argc);
 }
 
-int attackmoveUpCommand(Actor *a, int *args, int argc)
+int 
+attackmoveUpCommand(Actor *a, int *args, int argc)
 {
     free(args);
     argc = 2;
@@ -109,26 +122,39 @@ int attackmoveUpCommand(Actor *a, int *args, int argc)
     return attackmoveCommand(a, args, argc);
 }
 
-int attackmoveCommand(Actor *a, int *args, int argc)
+int 
+attackmoveCommand(Actor *a, int *args, int argc)
+{
+    int attackRes;
+    return (attackRes = attackCommand(a, args, argc)) ? attackRes : moveCommand(a, args, argc);
+}
+
+int
+attackCommand(Actor *a, int *args, int argc)
 {
     if (a->aiType == -1) {
         for (int i = 0; i < MONSTER_COUNT; i++) {
             if (monsters[i] == NULL)
-                return moveCommand(a, args, argc);
+                continue;
             if (monsters[i]->y == a->y + args[0] && monsters[i]->x == a->x + args[1]) {
-                    attackActor(a, monsters[i]);
-                    return a->weapon->speed;
-            } else {
-                return moveCommand(a, args, argc);
+                attackActor(a, monsters[i]);
+                return a->weapon->speed;
             }
         }
+        return 0;
     }
 
     if (a->y + args[0] == player->y && a->x + args[1] == player->x) {
         attackActor(a, player);
         return a->weapon->speed;
-    } 
-    return moveCommand(a, args, argc);
+    }
+    return 0;
+}
+
+int
+waitCommand(Actor *a, int *args, int argc)
+{
+    return 1;
 }
 
 int 

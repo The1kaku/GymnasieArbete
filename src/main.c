@@ -16,11 +16,12 @@ static void winScreen(void);
 static void updateItems(void);
 static void updateMonsters(void);
 
-static void runAi(void);
+static void runAi(int T);
 
 int 
 main(void)
 {
+    int T = 0;
     level = readLevelFromFile("levels/level.txt");
     
     Weapon sword = { "Basic Sword", 3, 5, 1, 10, 3 };
@@ -37,11 +38,14 @@ main(void)
 
     monsters[0] = undead;
 
-    if (init < 0)
+    if (init() < 0)
         return -1;
 
     do {
-        runAi();
+        mvprintw(3, 0, "%d", T);
+        refresh();
+        getch();
+        runAi(T);
         if (player->health < 1) {
             loseScreen();
             break;
@@ -51,6 +55,7 @@ main(void)
             break;
         }
         clearDisplay();
+
         focusCameraOnActor(player);
         addLevel(level);
 
@@ -61,8 +66,9 @@ main(void)
         //wprintw(playerWin, "ROOM (%02d,%02d) to (%02d,%02d)", room[0][0], room[0][1], room[1][0], room[1][1]); 
         addActor(player);
         //addCamera();
+
         refreshDisplay();
-    } while (readKeyInput(player) >= 0);
+    } while ((T = readKeyInput(player)) >= 0);
 
     deleteDisplay();
     endwin();
@@ -77,8 +83,7 @@ init(void)
         return -1;
     if (level == NULL)
         return -1;
-    if (initDisplay < 1)
-        return -1;
+    initDisplay();
     return 0;
 }
 
@@ -133,8 +138,11 @@ updateMonsters(void)
 }
 
 static void
-runAi(void)
+runAi(int T)
 {
+    int dT, lT;
+    if (T == 0)
+        return;
     Room room = getRoomBordersFromActor(level, player);
     for (int i = 0; i < MONSTER_COUNT; i++) {
         if (monsters[i] == NULL) 
@@ -143,19 +151,20 @@ runAi(void)
             continue;
         if (monsters[i]->x <= room[0][1] && monsters[i]->x >= room[1][1])
             continue;
-        if (monsters[i]->health < 1)
-            continue;
-        
-        switch(monsters[i]->aiType) {
+
+        dT = 1;
+        for (lT = T; lT > 0 && dT != 0; lT += -dT) {
+            switch(monsters[i]->aiType) {
             case -1:
                 break;
             case 0:
                 break;
             case 1:
-                chaserAi(monsters[i], player);
+                dT = chaserAi(lT, monsters[i], player);
                 break;
             default:
                 break;
+            }
         }
     }
 }

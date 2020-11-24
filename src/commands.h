@@ -27,6 +27,9 @@ int attackmoveCommand(Actor *a, int *args, int argc);
 // Attacking
 int attackCommand(Actor *a, int *args, int argc);
 
+// Strategy
+int waitCommand(Actor *a, int *args, int argc);
+
 // Exiting
 int exitCommand(Actor *a, int *args, int argc);
 
@@ -39,8 +42,8 @@ static Command __attribute__((unused)) commands[] = {
     { "attackmove left", 1, &attackmoveLeftCommand },
     { "attackmove down", 1, &attackmoveDownCommand },
     { "attackmove up", 1, &attackmoveUpCommand },
+    { "wait", 1, &waitCommand },
     { "exit", 1, &exitCommand },
 };
-
 
 #endif

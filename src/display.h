@@ -7,10 +7,6 @@
 #include "items.h"
 #include "level.h"
 
-static struct {
-    int y;
-    int x;
-} camera __attribute__((unused));
 
 enum {
     LEVEL_WIN_HEIGHT = 20,
@@ -25,7 +21,7 @@ WINDOW* playerWin;
 WINDOW* levelWin;
 WINDOW* textWin;
 
-int initDisplay(void);
+void initDisplay(void);
 void clearDisplay(void);
 void refreshDisplay(void);
 void deleteDisplay(void);

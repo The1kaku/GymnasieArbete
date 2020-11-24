@@ -24,14 +24,14 @@ int
 giveItemToActor(Actor *a, Item *i)
 {
     switch(i->type) {
-        case ITEM_TYPE_WEAPON:
-            a->weapon = (Weapon *) i->item;
-            return ITEM_TYPE_WEAPON;
-        case ITEM_TYPE_ARMOUR:
-            a->armour = (Armour *) i->item;
-            return ITEM_TYPE_ARMOUR;
-        default:
-            return 0;
+    case ITEM_TYPE_WEAPON:
+        a->weapon = (Weapon *) i->item;
+        return ITEM_TYPE_WEAPON;
+    case ITEM_TYPE_ARMOUR:
+        a->armour = (Armour *) i->item;
+        return ITEM_TYPE_ARMOUR;
+    default:
+        return 0;
     }
 }
 
