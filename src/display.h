@@ -25,7 +25,7 @@ WINDOW* playerWin;
 WINDOW* levelWin;
 WINDOW* textWin;
 
-void initDisplay(void);
+int initDisplay(void);
 void clearDisplay(void);
 void refreshDisplay(void);
 void deleteDisplay(void);

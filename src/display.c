@@ -4,7 +4,7 @@
 #include "display.h"
 #include "level.h"
 
-void 
+int 
 initDisplay(void)
 {
     initscr();
@@ -13,9 +13,12 @@ initDisplay(void)
     noecho();
     cbreak();
 
-    playerWin = newwin(PLAYER_WIN_HEIGHT, PLAYER_WIN_WIDTH, 0, 0);
-    levelWin = newwin(LEVEL_WIN_HEIGHT, LEVEL_WIN_WIDTH, 5, 0);
-    textWin = newwin(TEXT_WIN_HEIGHT, TEXT_WIN_WIDTH, 26, 0);
+    if ((playerWin = newwin(PLAYER_WIN_HEIGHT, PLAYER_WIN_WIDTH, 0, 0)) == NULL)
+        return -1;
+    if ((levelWin = newwin(LEVEL_WIN_HEIGHT, LEVEL_WIN_WIDTH, 5, 0)) == NULL)
+        return -1;
+    if ((textWin = newwin(TEXT_WIN_HEIGHT, TEXT_WIN_WIDTH, 26, 0)) == NULL)
+        return -1;
 
     camera.y = camera.x = 0;
 }
