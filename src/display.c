@@ -19,8 +19,9 @@ initDisplay(void)
     cbreak();
 
     playerWin = newwin(PLAYER_WIN_HEIGHT, PLAYER_WIN_WIDTH, 0, 0);
-    levelWin = newwin(LEVEL_WIN_HEIGHT, LEVEL_WIN_WIDTH, 5, 0);
-    textWin = newwin(TEXT_WIN_HEIGHT, TEXT_WIN_WIDTH, 26, 0);
+    levelWin = newwin(LEVEL_WIN_HEIGHT, LEVEL_WIN_WIDTH, PLAYER_WIN_HEIGHT, 0);
+    textWin = newwin(TEXT_WIN_HEIGHT, TEXT_WIN_WIDTH, PLAYER_WIN_HEIGHT+LEVEL_WIN_HEIGHT, 0);
+    inventoryWin = newwin(INVENTORY_WIN_HEIGHT, INVENTORY_WIN_WIDTH, PLAYER_WIN_HEIGHT, LEVEL_WIN_WIDTH);
 
     camera.y = camera.x = 0;
 }
@@ -31,6 +32,7 @@ clearDisplay(void)
     wclear(playerWin);
     wclear(levelWin);
     wclear(textWin);
+    wclear(inventoryWin);
 }
 
 void 
@@ -39,6 +41,7 @@ refreshDisplay(void)
     wrefresh(levelWin);
     wrefresh(playerWin);
     wrefresh(textWin);
+    wrefresh(inventoryWin);
 }
 
 void 
@@ -47,6 +50,7 @@ deleteDisplay(void)
     delwin(levelWin);
     delwin(playerWin);
     delwin(textWin);
+    delwin(inventoryWin);
 }
 
 void 
@@ -105,4 +109,15 @@ void
 addCamera(void)
 {
     mvwprintw(playerWin, 1, 0, "CAMERA: (%d,%d)\n", camera.y, camera.x);
+}
+
+char
+promptPlayer(const char *s)
+{
+    int c;
+    wprintw(textWin, "%s", s);
+    wrefresh(textWin);
+    while ((c = getch()) != 'y' && c != 'n')
+        ;
+    return c;
 }

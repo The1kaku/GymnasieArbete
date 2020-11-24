@@ -5,6 +5,7 @@ enum {
     ITEM_SYMBOL = '^',
     ITEM_TYPE_WEAPON = 1,
     ITEM_TYPE_ARMOUR = 2,
+    ITEM_TYPE_INVENTORY = 3,
 };
 
 typedef struct Item {

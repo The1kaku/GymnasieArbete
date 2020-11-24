@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 
+#include "display.h"
+
 void 
 moveActor(Actor *a, const int dy, const int dx)
 {
@@ -25,14 +27,34 @@ giveItemToActor(Actor *a, Item *i)
 {
     switch(i->type) {
     case ITEM_TYPE_WEAPON:
-        a->weapon = (Weapon *) i->item;
+        if (promptPlayer("Swap your current weapon? (y or n)") == 'y') {
+            a->weapon = (Weapon *) i->item;
+        } else {
+            return putItemInInventory(a, i);
+        }
         return ITEM_TYPE_WEAPON;
     case ITEM_TYPE_ARMOUR:
-        a->armour = (Armour *) i->item;
+        if (promptPlayer("Swap your current armour? (y or n)") == 'y') {
+            a->armour = (Armour *) i->item;
+        } else {
+            return putItemInInventory(a, i);
+        }
         return ITEM_TYPE_ARMOUR;
     default:
         return 0;
     }
+}
+
+int
+putItemInInventory(Actor *a, Item *i)
+{
+    for (int j = 0; j < INVENTORY_SIZE; j++) {
+        if (a->inventory[j] == NULL) {
+            a->inventory[j] = i;
+            return ITEM_TYPE_INVENTORY;
+        }
+    }
+    return 0;
 }
 
 Actor *

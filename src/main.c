@@ -25,13 +25,17 @@ main(void)
     level = readLevelFromFile("levels/level.txt");
     
     Weapon sword = { "Basic Sword", 3, 5, 1, 10, 3 };
-    Item isword = { &sword, 5, 5, ITEM_TYPE_WEAPON };
+    Item isword1 = { &sword, 5, 5, ITEM_TYPE_WEAPON };
+    Item isword2 = { &sword, 10, 5, ITEM_TYPE_WEAPON };
+    Item isword3 = { &sword, 5, 13, ITEM_TYPE_WEAPON };
 
     Weapon fists = { "A pair of fists", 0, 0, 3, -1, 5 };
 
     Armour naked = { "Unarmoured", 1, 1, 1, -1 };
 
-    groundItems[0] = &isword;   
+    groundItems[0] = &isword1;
+    groundItems[1] = &isword2; 
+    groundItems[2] = &isword3;    
 
     player = createActor(1, 1, 20, '@', 1, &fists, &naked, -1);
     undead = createActor(8, 8, 20, 'Z', 1, &sword, &naked, 1);
@@ -42,9 +46,6 @@ main(void)
         return -1;
 
     do {
-        mvprintw(3, 0, "%d", T);
-        refresh();
-        getch();
         runAi(T);
         if (player->health < 1) {
             loseScreen();
