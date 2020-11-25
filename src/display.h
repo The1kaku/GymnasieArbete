@@ -6,16 +6,17 @@
 #include "actor.h"
 #include "items.h"
 #include "level.h"
+#include "info.h"
 
 
 enum {
-    LEVEL_WIN_HEIGHT = 20,
+    LEVEL_WIN_HEIGHT = 22,
     LEVEL_WIN_WIDTH = 50,
-    PLAYER_WIN_HEIGHT = 2,
+    PLAYER_WIN_HEIGHT = 1,
     PLAYER_WIN_WIDTH = 80,
-    TEXT_WIN_HEIGHT = 2,
+    TEXT_WIN_HEIGHT = 1,
     TEXT_WIN_WIDTH = 50,
-    INVENTORY_WIN_HEIGHT = 22,
+    INVENTORY_WIN_HEIGHT = 14,
     INVENTORY_WIN_WIDTH = 30,
 };
 

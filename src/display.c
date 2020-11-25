@@ -22,6 +22,7 @@ initDisplay(void)
     levelWin = newwin(LEVEL_WIN_HEIGHT, LEVEL_WIN_WIDTH, PLAYER_WIN_HEIGHT, 0);
     textWin = newwin(TEXT_WIN_HEIGHT, TEXT_WIN_WIDTH, PLAYER_WIN_HEIGHT+LEVEL_WIN_HEIGHT, 0);
     inventoryWin = newwin(INVENTORY_WIN_HEIGHT, INVENTORY_WIN_WIDTH, PLAYER_WIN_HEIGHT, LEVEL_WIN_WIDTH);
+    infoWin = newwin(INFO_WIN_HEIGHT, INFO_WIN_WIDTH, PLAYER_WIN_HEIGHT+INVENTORY_WIN_HEIGHT, LEVEL_WIN_WIDTH);
 
     camera.y = camera.x = 0;
 }
@@ -51,6 +52,7 @@ deleteDisplay(void)
     delwin(playerWin);
     delwin(textWin);
     delwin(inventoryWin);
+    delwin(infoWin);
 }
 
 void 

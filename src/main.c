@@ -38,7 +38,7 @@ main(void)
     groundItems[2] = &isword3;    
 
     player = createActor(1, 1, 20, '@', 1, &fists, &naked, -1);
-    undead = createActor(8, 8, 20, 'Z', 1, &sword, &naked, 1);
+    undead = createActor(8, 8, 20, 'Z', 1, &fists, &naked, 1);
 
     monsters[0] = undead;
 

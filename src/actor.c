@@ -20,6 +20,7 @@ attackActor(Actor *a, Actor *d)
     damage += a->weapon->pierce / d->armour->pierce;
     damage += a->weapon->slash / d->armour->slash;
     d->health -= damage;
+    addInfo("%c attacked %c for %d\n", a->symbol, d->symbol, damage);
 }
 
 int 
@@ -30,6 +31,7 @@ giveItemToActor(Actor *a, Item *i)
         if (promptPlayer("Swap your current weapon? (y or n)") == 'y') {
             a->weapon = (Weapon *) i->item;
         } else {
+            addInfo("put item in inventory");
             return putItemInInventory(a, i);
         }
         return ITEM_TYPE_WEAPON;
@@ -37,6 +39,7 @@ giveItemToActor(Actor *a, Item *i)
         if (promptPlayer("Swap your current armour? (y or n)") == 'y') {
             a->armour = (Armour *) i->item;
         } else {
+            addInfo("put item in inventory");
             return putItemInInventory(a, i);
         }
         return ITEM_TYPE_ARMOUR;
