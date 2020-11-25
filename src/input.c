@@ -39,6 +39,7 @@ readTextInput(Actor *p)
     int size, res, T;
     echo();
     nocbreak();
+    wclear(textWin);
     mvwaddch(textWin, 0, 0, '/');
 
     wgetstr(textWin, str);

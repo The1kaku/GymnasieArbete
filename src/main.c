@@ -21,10 +21,11 @@ static void runAi(int T);
 int 
 main(void)
 {
+    int turn = 0;
     int T = 0;
     level = readLevelFromFile("levels/level.txt");  
 
-    player = createActor( 1, 1, 20, '@', 1, 0, 0, 0, 10);
+    player = createActor( 1, 1, 20, '@', 1, 1, 0, -1, 10);
     undead = createActor( 8, 8, 20, 'Z', 3, 0, 0, 1, 5);
     monsters[0] = undead;
 
@@ -32,6 +33,8 @@ main(void)
         return -1;
 
     do {
+        turn++;
+        //attackActor(monsters[0], player);
         runAi(T);
         if (player->health < 1) {
             loseScreen();
@@ -62,6 +65,23 @@ main(void)
     return 0;
 }
 
+void
+putItemOnGround(const ItemID id, const Actor *a)
+{
+    int i;
+    GroundItem *item;
+    if (id == 0)
+        return;
+    for (i = 0; i < ITEM_COUNT && groundItems[i] != NULL; i++)
+        ;
+    if (i < ITEM_COUNT) {
+        item = (GroundItem *) malloc(sizeof(GroundItem));
+        GroundItem temp = { id, a->y+1, a->x };
+        *item = temp;
+        groundItems[i] = item;
+    }
+}
+
 static int
 init(void)
 {
@@ -77,25 +97,15 @@ init(void)
 static void
 loseScreen(void)
 {
-    clear();
-    printw("You died.");
-    mvprintw(15, 5, "Press any key to exit");
-    refresh();
-    getch();
-    clear();
-    refresh();
+    addInfo("You lost.");
+    promptPlayer("Press any key to exit.");
 }
 
 static void
 winScreen(void)
 {
-    clear();
-    printw("You Won!");
-    mvprintw(15, 5, "Press any key to exit");
-    refresh();
-    getch();
-    clear();
-    refresh();
+    addInfo("You won!");
+    promptPlayer("Press any key to exit.");
 }
 
 static void

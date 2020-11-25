@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 #include "commands.h"
 #include "display.h"
@@ -145,6 +146,56 @@ attackCommand(Actor *a, int *args, int argc)
 
     if (a->y + args[0] == player->y && a->x + args[1] == player->x) {
         return attackActor(a, player);
+    }
+    return 0;
+}
+
+int 
+dropWeaponCommand(Actor *a, int *args, int argc)
+{
+    putItemOnGround(a->weapon, a);
+    a->weapon = 0;
+    addInfo("Dropped weapon.\n");
+    return 0;
+}
+
+int 
+dropArmourCommand(Actor *a, int *args, int argc)
+{
+    putItemOnGround(a->armour, a);
+    a->armour = 0;
+    addInfo("Dropped armour.\n");
+    return 0;
+}
+
+int 
+dropInventoryItemCommand(Actor *a, int *args, int argc)
+{
+    int c;
+    if ((c = invPromptPlayer(a, "Which item in your inventory do you want to drop? (1 to %x)", a->inventorySize)) >= 0) {
+        if (a->inventory[c] == 0) {
+            addInfo("Dropped nothing.\n");
+        } else {
+            addInfo("Dropped item in slot %x.\n", c+1);
+            putItemOnGround(a->inventory[c], a);
+            a->inventory[c] = 0;
+        }
+    }
+    return 0;
+}
+
+int
+equipCommand(Actor *a, int *args, int argc)
+{
+    int saved, c;
+    if ((c = invPromptPlayer(a, "Which item in your inventory do you want to equip? (1 to %x)", a->inventorySize)) >= 0) {
+        if (a->inventory[c] == 0) {
+            addInfo("Could not equip, nothing.\n");
+        } else {
+            saved = a->inventory[c];
+            a->inventory[c] = 0;
+            giveItemToActor(a, saved);
+        }
     }
     return 0;
 }

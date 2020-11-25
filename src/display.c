@@ -1,5 +1,7 @@
 #include <curses.h>
 #include <stdlib.h>
+#include <stdarg.h>
+#include <ctype.h>
 
 #include "display.h"
 #include "level.h"
@@ -119,9 +121,9 @@ addInventory(const ItemID *inv, const unsigned invSize)
     waddstr(inventoryWin, " INVENTORY:\n");
     for (int i = 0; i < invSize && i < INVENTORY_WIN_HEIGHT-1; i++) {
         if (getItemCap(inv[i], CAP_NAME)) {
-            wprintw(inventoryWin, "%2d. %s\n", i+1, getItemName(inv[i]));
+            wprintw(inventoryWin, "%x. %s\n", i+1, getItemName(inv[i]));
         } else {
-            wprintw(inventoryWin, "%2d. - \n", i+1);
+            wprintw(inventoryWin, "%x. - \n", i+1);
         }
     }
     wrefresh(inventoryWin);
@@ -134,12 +136,40 @@ addCamera(void)
 }
 
 char
-promptPlayer(const char *s)
+promptPlayer(const char *format, ...)
 {
-    int c;
-    wprintw(textWin, "%s", s);
+    char str[TEXT_WIN_WIDTH];
+
+    va_list local_argv;
+    va_start(local_argv, format);
+    vsprintf(str, format, local_argv);
+    va_end(local_argv);
+
+    wclear(textWin);
+    wprintw(textWin, "%s", str);
     wrefresh(textWin);
-    while ((c = getch()) != 'y' && c != 'n')
-        ;
-    return c;
+
+    noecho();
+    cbreak();
+    return getch();
+}
+
+char
+invPromptPlayer(const Actor *a, const char *format, ...)
+{
+    int in = promptPlayer("Which item in your inventory do you want to equip? (1 to %x)", a->inventorySize);
+    int c = in;
+    if (isdigit(c)) {
+        c -= '0' + 1;
+    } else if (c >= 'a' && c <= 'f') {
+        c += 8 - 'a';
+    } else {
+        addInfo("Unable to access '%c' in inventory.\n", in);
+        return 0;
+    }
+    if (c <= a->inventorySize) {
+        return c;
+    }
+    addInfo("Value '%c' out of range (1 to %x).\n", in, a->inventorySize);
+    return 0;
 }

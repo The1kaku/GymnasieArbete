@@ -20,8 +20,10 @@ attackActor(Actor *a, Actor *d)
     atk = getItemAtk(a->weapon);
     def = getItemDef(d->armour);
 
-    if (atk == NULL)
+    if (atk == NULL) {
+        addInfo("%c failed to attack %c.\n", a->symbol, d->symbol);
         return 0;
+    }
 
     attackerDamage = 0;
     attackerDamage += atk[ATK_IMPACT] / ((def == NULL) ? 1 : def[DEF_IMPACT]);
@@ -34,10 +36,18 @@ attackActor(Actor *a, Actor *d)
     a->health -= defenderDamage;
     d->health -= attackerDamage;
 
-    if (defenderDamage > 0)
-        addInfo("%c attacked %c for %d and took %d thorns.\n", a->symbol, d->symbol, attackerDamage, defenderDamage);
-    else 
-        addInfo("%c attacked %c for %d", a->symbol, d->symbol, attackerDamage);
+    if (d->health > 0) {
+        if (defenderDamage > 0)
+            addInfo("%c attacked %c for %dHP and took %dHP thorns.\n", a->symbol, d->symbol, attackerDamage, defenderDamage);
+        else 
+            addInfo("%c attacked %c for %dHP.\n", a->symbol, d->symbol, attackerDamage);
+    } else {
+        if (defenderDamage > 0)
+            addInfo("%c killed %c but took %dHP thorns!\n", a->symbol, d->symbol, attackerDamage, defenderDamage);
+        else 
+            addInfo("%c killed %c!\n", a->symbol, d->symbol, attackerDamage);
+    }
+    
     
     return atk[ATK_SPEED];
 }
@@ -45,25 +55,37 @@ attackActor(Actor *a, Actor *d)
 int 
 giveItemToActor(Actor *a, ItemID id)
 {
-    if (getItemCap(id, CAP_ATTACK) && promptPlayer("Swap your current weapon? (y or n)")  == 'y') {
-        if (putItemInInventory(a, a->weapon) > 0) {
-            addInfo("Put current weapon in inventory\n");
-        } else {
-            addInfo("Could not put current weapon in inventory\n");
-            return -1;
+    if (getItemCap(id, CAP_ATTACK))
+        if (promptPlayer("Swap your current weapon? (y or n)")  == 'y') {
+            if (a->weapon != 0) {
+                if (putItemInInventory(a, a->weapon) > 0) {
+                    addInfo("Put current weapon in inventory.\n");
+                } else {
+                    addInfo("Inventory is full.\n");
+                    return -1;
+                }
+            }
+            addInfo("Equiped new weapon.\n");
+            return a->weapon = id;
         }
-        return a->weapon = id;
-    } else if (getItemCap(id, CAP_DEFEND) && promptPlayer("Swap your current armour? (y or n)") == 'y') {
-        if (putItemInInventory(a, a->armour) > 0) {
-            addInfo("Put current armour in inventory\n");
-        } else {
-            addInfo("Could not put current weapon in inventory\n");
-            return -1;
+
+    if (getItemCap(id, CAP_DEFEND) == 1)
+        if (promptPlayer("Swap your current armour? (y or n)") == 'y') {
+            if (putItemInInventory(a, a->armour) > 0) {
+                addInfo("Put current armour in inventory\n");
+            } else {
+                addInfo("Inventory is full.\n");
+                return -1;
+            }
+            addInfo("Exquiped new armour.\n");
+            return a->armour = id;
         }
-        return a->armour = id;
-    } else {
+
+    if (promptPlayer("Put item in inventory? (y or n)") == 'y') {
+        addInfo("Item added to inventory.\n", a->symbol);
         return putItemInInventory(a, id);
     }
+    return 0;
 }
 
 int

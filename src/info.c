@@ -24,10 +24,10 @@ addInfo(const char *format, ...)
     vsprintf(*ptr, format, local_argv);
     va_end(local_argv);
 
+    ptr++;
+
     wclear(infoWin);
     for (char **beg = &buf[0]; beg < ptr; beg++)
         waddstr(infoWin, *beg);
     wrefresh(infoWin);
-
-    ptr++;
 }

@@ -15,9 +15,16 @@ typedef struct Item {
 static Item *database[DATABASE_SIZE];
 static ItemID databaseIndex = 0;
 
+int allocItem(Item *i);
+
 void
 initItems(void)
 {
+    static Item nullItem;
+    allocItem(&nullItem);
+    static Item sword = { .capabilities = { 1, 1, 0 }, .name = "Basic Sword", .atk = { 0, 2, 4, 4 }, .def = { 1, 1, 1, 1 }};
+    allocItem(&sword);
+    
     return;
 }
 

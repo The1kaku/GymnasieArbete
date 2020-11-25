@@ -27,6 +27,12 @@ int attackmoveCommand(Actor *a, int *args, int argc);
 // Attacking
 int attackCommand(Actor *a, int *args, int argc);
 
+// Items
+int dropWeaponCommand(Actor *a, int *args, int argc);
+int dropArmourCommand(Actor *a, int *args, int argc);
+int dropInventoryItemCommand(Actor *a, int *args, int argc);
+int equipCommand(Actor *a, int *args, int argc);
+
 // Strategy
 int waitCommand(Actor *a, int *args, int argc);
 
@@ -44,6 +50,10 @@ static Command __attribute__((unused)) commands[] = {
     { "attackmove up", 1, &attackmoveUpCommand },
     { "wait", 1, &waitCommand },
     { "exit", 1, &exitCommand },
+    { "drop", 1, &dropInventoryItemCommand },
+    { "drop weapon", 1, &dropWeaponCommand },
+    { "dorp aromur", 1, &dropArmourCommand }, 
+    { "equip", 1, &equipCommand },
 };
 
 #endif
