@@ -31,6 +31,8 @@ typedef struct GroundItem {
     int x;
 } GroundItem;
 
+void initItems(void);
+
 const char *getItemName(const ItemID id);
 const int getItemCap(const ItemID, const unsigned CAP_ID);
 const int *getItemAtk(const ItemID id);

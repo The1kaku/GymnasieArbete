@@ -17,8 +17,8 @@ typedef struct Actor {
     unsigned savedTime;
 } Actor;
 
-void moveActor(Actor *a, const int dy, const int dx);
-void attackActor(Actor *a, Actor *d);
+int moveActor(Actor *a, const int dy, const int dx);
+int attackActor(Actor *a, Actor *d);
 
 int giveItemToActor(Actor *a, ItemID id);
 int putItemInInventory(Actor *a, ItemID id);

@@ -11,6 +11,7 @@ int
 chaserAi(int T, Actor *a, Actor *p) 
 {
     int dy, dx, *args, argc;
+    const int *atk;
     dy = a->y - p->y;
     dx = a->x - p->x;
     argc = 2;
@@ -20,8 +21,8 @@ chaserAi(int T, Actor *a, Actor *p)
         args = generateArgs(argc, 0, -dx / abs(dx));  
     }
     if (T >= a->speed) {
-        return (T >= 0 /* ITEM ATTACKSPEED */) ? attackmoveCommand(a, args, argc) : moveCommand(a, args, argc);
+        return (T >= (((atk = getItemAtk(a->weapon)) != NULL) ? atk[ATK_SPEED] : __INT_MAX__)) ? attackmoveCommand(a, args, argc) : moveCommand(a, args, argc);
     } else {
-        return (T >= 0 /* ITEM ATTACKSPEED */) ? attackCommand(a, args, argc) : 0;
+        return (T >= (((atk = getItemAtk(a->weapon)) != NULL) ? atk[ATK_SPEED] : __INT_MAX__)) ? attackCommand(a, args, argc) : 0;
     }
 }

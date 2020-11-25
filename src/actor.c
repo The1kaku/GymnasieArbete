@@ -4,14 +4,15 @@
 
 #include "display.h"
 
-void 
+int 
 moveActor(Actor *a, const int dy, const int dx)
 {
     a->y += dy;
     a->x += dx;
+    return a->speed;
 }
 
-void
+int
 attackActor(Actor *a, Actor *d)
 {
     int attackerDamage, defenderDamage;
@@ -19,16 +20,16 @@ attackActor(Actor *a, Actor *d)
     atk = getItemAtk(a->weapon);
     def = getItemDef(d->armour);
 
-    if (atk == NULL || def == NULL)
-        return;
+    if (atk == NULL)
+        return 0;
 
     attackerDamage = 0;
-    attackerDamage += atk[ATK_IMPACT] / def[DEF_IMPACT];
-    attackerDamage += atk[ATK_PIERCE] / def[DEF_PIERCE];
-    attackerDamage += atk[ATK_SLASH] / def[DEF_SLASH];
+    attackerDamage += atk[ATK_IMPACT] / ((def == NULL) ? 1 : def[DEF_IMPACT]);
+    attackerDamage += atk[ATK_PIERCE] / ((def == NULL) ? 1 : def[DEF_PIERCE]);
+    attackerDamage += atk[ATK_SLASH] / ((def == NULL) ? 1 : def[DEF_SLASH]);
 
     defenderDamage = 0;
-    defenderDamage += def[DEF_THORNS];
+    defenderDamage += ((def == NULL) ? 0 : def[DEF_THORNS]);
 
     a->health -= defenderDamage;
     d->health -= attackerDamage;
@@ -37,6 +38,8 @@ attackActor(Actor *a, Actor *d)
         addInfo("%c attacked %c for %d and took %d thorns.\n", a->symbol, d->symbol, attackerDamage, defenderDamage);
     else 
         addInfo("%c attacked %c for %d", a->symbol, d->symbol, attackerDamage);
+    
+    return atk[ATK_SPEED];
 }
 
 int 

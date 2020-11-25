@@ -15,6 +15,12 @@ typedef struct Item {
 static Item *database[DATABASE_SIZE];
 static ItemID databaseIndex = 0;
 
+void
+initItems(void)
+{
+    return;
+}
+
 int 
 allocItem(Item *i)
 {

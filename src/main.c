@@ -70,6 +70,7 @@ init(void)
     if (level == NULL)
         return -1;
     initDisplay();
+    initItems();
     return 0;
 }
 
