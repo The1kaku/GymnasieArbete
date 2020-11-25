@@ -22,24 +22,10 @@ int
 main(void)
 {
     int T = 0;
-    level = readLevelFromFile("levels/level.txt");
-    
-    Weapon sword = { "Basic Sword", 3, 5, 1, 10, 3 };
-    Item isword1 = { &sword, 5, 5, ITEM_TYPE_WEAPON };
-    Item isword2 = { &sword, 10, 5, ITEM_TYPE_WEAPON };
-    Item isword3 = { &sword, 5, 13, ITEM_TYPE_WEAPON };
+    level = readLevelFromFile("levels/level.txt");  
 
-    Weapon fists = { "A pair of fists", 0, 0, 3, -1, 5 };
-
-    Armour naked = { "Unarmoured", 1, 1, 1, -1 };
-
-    groundItems[0] = &isword1;
-    groundItems[1] = &isword2; 
-    groundItems[2] = &isword3;    
-
-    player = createActor(1, 1, 20, '@', 1, &fists, &naked, -1);
-    undead = createActor(8, 8, 20, 'Z', 1, &fists, &naked, 1);
-
+    player = createActor( 1, 1, 20, '@', 1, 0, 0, 0, 10);
+    undead = createActor( 8, 8, 20, 'Z', 3, 0, 0, 1, 5);
     monsters[0] = undead;
 
     if (init() < 0)
@@ -63,10 +49,9 @@ main(void)
         updateItems();
         updateMonsters();
 
-        //Room room = getRoomBordersFromActor(level, player);
-        //wprintw(playerWin, "ROOM (%02d,%02d) to (%02d,%02d)", room[0][0], room[0][1], room[1][0], room[1][1]); 
+        addInventory(player->inventory, player->inventorySize);
         addActor(player);
-        //addCamera();
+        addActorStats(player);
 
         refreshDisplay();
     } while ((T = readKeyInput(player)) >= 0);
@@ -117,12 +102,13 @@ updateItems(void)
 {
     for (int i = 0; i < ITEM_COUNT; i++)
         if (groundItems[i] != NULL) {
-            if (groundItems[i]->y == player->y && groundItems[i]->x == player->x && (giveItemToActor(player, groundItems[i]) > 0)) {
+            if (groundItems[i]->y == player->y && groundItems[i]->x == player->x && (giveItemToActor(player, groundItems[i]->id) > 0)) {
                 groundItems[i] = NULL;
             } else {
                 addItem(groundItems[i]);
             }
         }
+    return;
 }
 
 static void
@@ -154,7 +140,9 @@ runAi(int T)
             continue;
 
         dT = 1;
-        for (lT = T; lT > 0 && dT != 0; lT += -dT) {
+        lT = T + monsters[i]->savedTime;
+        monsters[i]->savedTime = 0;
+        for (; lT > 0 && dT != 0; lT += -dT) {
             switch(monsters[i]->aiType) {
             case -1:
                 break;
@@ -167,5 +155,6 @@ runAi(int T)
                 break;
             }
         }
+        monsters[i]->savedTime += lT;
     }
 }

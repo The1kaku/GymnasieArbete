@@ -1,35 +1,39 @@
 #ifndef ITEMS_H
 #define ITEMS_H
 
-enum {
-    ITEM_SYMBOL = '^',
-    ITEM_TYPE_WEAPON = 1,
-    ITEM_TYPE_ARMOUR = 2,
-    ITEM_TYPE_INVENTORY = 3,
+#define ITEM_SYMBOL '^'
+
+enum CAPABILITIES {
+    CAP_NAME = 0,
+    CAP_ATTACK = 1,
+    CAP_DEFEND = 2,
 };
 
-typedef struct Item {
-    void *item;
+enum ATTACK_CAPABILITIES {
+    ATK_IMPACT = 0,
+    ATK_PIERCE = 1,
+    ATK_SLASH = 2,
+    ATK_SPEED = 3,
+};
+
+enum DEFEND_CAPABILITIES {
+    DEF_IMPACT = 0,
+    DEF_PIERCE = 1,
+    DEF_SLASH = 2,
+    DEF_THORNS = 3,
+};
+
+typedef unsigned short ItemID;
+
+typedef struct GroundItem {
+    ItemID id;
     int y;
     int x;
-    int type;
-} Item;
+} GroundItem;
 
-typedef struct Weapon {
-    char *name;
-    int pierce;
-    int slash;
-    int impact;
-    int durability;
-    int speed;
-} Weapon;
-
-typedef struct Armour {
-    char *name;
-    int pierce;
-    int slash;
-    int impact;
-    int durability;
-} Armour;
+const char *getItemName(const ItemID id);
+const int getItemCap(const ItemID, const unsigned CAP_ID);
+const int *getItemAtk(const ItemID id);
+const int *getItemDef(const ItemID id);
 
 #endif

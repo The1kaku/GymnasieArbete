@@ -35,9 +35,11 @@ void focusCameraOnPosition(const int y, const int x);
 void setCamera(const int y, const int x);
  
 void addActor(const Actor *a);
-void addItem(const Item *i);
+void addActorStats(const Actor *a);
+void addItem(const GroundItem *i);
 void addLevel(const Level l);
 void addCamera(void);
+void addInventory(const ItemID *inv, const unsigned invSize);
 
 char promptPlayer(const char *s);
 

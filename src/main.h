@@ -13,6 +13,6 @@ Actor *player;
 Actor *monsters[MONSTER_COUNT];
 Actor *undead;
 
-Item *groundItems[ITEM_COUNT];
+GroundItem *groundItems[ITEM_COUNT];
 
 #endif

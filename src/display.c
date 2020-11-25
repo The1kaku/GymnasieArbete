@@ -80,11 +80,16 @@ addActor(const Actor *a)
     int y, x;
     if ((y = a->y + camera.y) >= 0 && y < LEVEL_WIN_HEIGHT && (x = a->x + camera.x) >= 0 && x < LEVEL_WIN_WIDTH)
        mvwaddch(levelWin, y, x, a->symbol);
-    wprintw(playerWin, "%c (%02d,%02d) HP: %d W: %s A: %s\n", a->symbol, a->y, a->x, a->health, (a->weapon == NULL) ? "none" : a->weapon->name, (a->armour == NULL) ? "none" : a->armour->name);
 }
 
 void
-addItem(const Item *i)
+addActorStats(const Actor *a)
+{
+    wprintw(playerWin, "%c (%02d,%02d) HP: %d W: %s A: %s\n", a->symbol, a->y, a->x, a->health, getItemName(a->weapon), getItemName(a->armour));
+}
+
+void
+addItem(const GroundItem *i)
 {
     int y, x;
     if ((y = i->y + camera.y) >= 0 && y < LEVEL_WIN_HEIGHT && (x = i->x + camera.x) >= 0 && x < LEVEL_WIN_WIDTH)
@@ -105,6 +110,21 @@ addLevel(const Level l)
         n = ((camera.x > 0) ? LEVEL_WIN_WIDTH - camera.x : LEVEL_WIN_WIDTH);
         mvwaddnstr(levelWin, row, col, str, n);
     }
+}
+
+void
+addInventory(const ItemID *inv, const unsigned invSize)
+{
+    wclear(inventoryWin);
+    waddstr(inventoryWin, " INVENTORY:\n");
+    for (int i = 0; i < invSize && i < INVENTORY_WIN_HEIGHT-1; i++) {
+        if (getItemCap(inv[i], CAP_NAME)) {
+            wprintw(inventoryWin, "%2d. %s\n", i+1, getItemName(inv[i]));
+        } else {
+            wprintw(inventoryWin, "%2d. - \n", i+1);
+        }
+    }
+    wrefresh(inventoryWin);
 }
 
 void

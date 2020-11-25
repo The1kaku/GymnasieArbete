@@ -20,8 +20,8 @@ chaserAi(int T, Actor *a, Actor *p)
         args = generateArgs(argc, 0, -dx / abs(dx));  
     }
     if (T >= a->speed) {
-        return (T >= a->weapon->speed) ? attackmoveCommand(a, args, argc) : moveCommand(a, args, argc);
+        return (T >= 0 /* ITEM ATTACKSPEED */) ? attackmoveCommand(a, args, argc) : moveCommand(a, args, argc);
     } else {
-        return (T >= a->weapon->speed) ? attackCommand(a, args, argc) : 0;
+        return (T >= 0 /* ITEM ATTACKSPEED */) ? attackCommand(a, args, argc) : 0;
     }
 }

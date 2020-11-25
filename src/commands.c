@@ -138,7 +138,7 @@ attackCommand(Actor *a, int *args, int argc)
                 continue;
             if (monsters[i]->y == a->y + args[0] && monsters[i]->x == a->x + args[1]) {
                 attackActor(a, monsters[i]);
-                return a->weapon->speed;
+                return 0; // ! ITEM ATTACKSPEED
             }
         }
         return 0;
@@ -146,7 +146,7 @@ attackCommand(Actor *a, int *args, int argc)
 
     if (a->y + args[0] == player->y && a->x + args[1] == player->x) {
         attackActor(a, player);
-        return a->weapon->speed;
+        return 0; // ! ITEM ATTACKSPEED
     }
     return 0;
 }
