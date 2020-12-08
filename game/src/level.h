@@ -3,8 +3,10 @@
 
 #include "actor.h"
 
-#define LEVEL_HEIGHT 100
-#define LEVEL_WIDTH 100
+enum {
+    LEVEL_HEIGHT = 200,
+    LEVEL_WIDTH = 300,
+};
 
 typedef char **Level;
 typedef int **Room;

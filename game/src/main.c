@@ -23,9 +23,10 @@ main(void)
 {
     int turn = 0;
     int T = 0;
-    level = readLevelFromFile("levels/level.txt");  
+    system("levels\\levelgen\\build\\a.exe");
+    level = readLevelFromFile("levels/level");  
 
-    player = createActor( 1, 1, 20, '@', 1, 1, 0, -1, 10);
+    player = createActor( 84, 91, 20, '@', 1, 1, 0, -1, 10);
     undead = createActor( 8, 8, 20, 'Z', 3, 0, 0, 1, 5);
     monsters[0] = undead;
 
