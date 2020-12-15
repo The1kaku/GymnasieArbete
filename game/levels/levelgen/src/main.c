@@ -3,9 +3,11 @@
 #include <string.h>
 #include <time.h>
 
+#include "../../../src/level.h"
+
 enum {
     DEFAULT_LEVEL_HEIGHT = 150,
-    DEFAULT_LEVEL_WIDTH = 250,
+    DEFAULT_LEVEL_WIDTH = 150,
     START_ROOM_HEIGHT = 5,
     START_ROOM_WIDTH = 7,
     DEFAULT_MAX_DEPTH = 5,
@@ -22,12 +24,17 @@ enum {
     ROOM_MAX_DELTA_X = 30,
 };
 
-typedef struct Room {
+enum {
+    MAX_MONSTERS = 50,
+    MAX_ITEMS = 50,
+};
+
+typedef struct RoomTemplate {
     int centery, centerx;
     int height, width;
     int starty, startx;
     int depth;
-} Room;
+} RoomTemplate;
 
 typedef struct Path {
     int length;
@@ -42,31 +49,38 @@ typedef struct Path {
 int randomInt(int min, int max);
 int randomPercent(int percentage);
 
+void generateRandomItems(const int cy, const int cx, const int h, const int w, const int d);
+void generateRandomMonsters(const int cy, const int cx, const int h, const int w, const int d);
+int createMonster(const int y, const int x, const int r);
+int createItem(const int y, const int x, const int r);
 char **createLevel(int height, int width);
 Path createPath(int starty, int startx, int endy, int endx);
-Room createRoom(int d, int cy, int cx, int minh, int maxh, int minw, int maxw);
-void generateBranches(Room *room, int depth, int chance);
-int generateRandomBranch(Path *path, Room *room, int chance, int cy, int cx, int mindy, int maxdy, int mindx, int maxdx, int minh, int maxh, int minw, int maxw, int depth);
-int AABB(Room room);
+RoomTemplate createRoomTemplate(int d, int cy, int cx, int minh, int maxh, int minw, int maxw);
+void generateBranches(RoomTemplate *room, int depth, int chance);
+int generateRandomBranch(Path *path, RoomTemplate *room, int chance, int cy, int cx, int mindy, int maxdy, int mindx, int maxdx, int minh, int maxh, int minw, int maxw, int depth);
+int AABB(RoomTemplate room);
 int rectCollision(int t1, int h1, int t2, int h2, int l1, int w1, int l2, int w2);
 
-void addRoom(char **level, const Room *room, char c);
+void addRoomTemplate(char **level, const RoomTemplate *room, char c);
 void addPath(char **level, const Path *path, char c);
 
 void printLevel(FILE *f, const char **level);
 void printPath(Path path);
-void printRoom(Room room);
+void printRoomTemplate(RoomTemplate room);
 
 Path paths[500];
-Room rooms[500];
-Room start;
+RoomTemplate rooms[500];
+RoomTemplate start;
 int path_counter = 0;
 int max_depth, max_branches, display_depth;
+int monsters[MAX_MONSTERS][3], monster_count = 0;
+int items[MAX_ITEMS][3], item_count = 0;
 
 int
 main(int argc, char **argv)
 {
-    char ** level;
+    char **level;
+
 
     max_depth = (argc >= 2) ? strtol(argv[1], NULL, 10) : DEFAULT_MAX_DEPTH;
     max_branches = (argc >= 3) ? strtol(argv[2], NULL, 10) : __INT_MAX__;
@@ -74,8 +88,8 @@ main(int argc, char **argv)
 
     srand(time(NULL));
     
-    level = createLevel(DEFAULT_LEVEL_HEIGHT, DEFAULT_LEVEL_WIDTH);
-    start = createRoom(0, DEFAULT_LEVEL_HEIGHT/2, DEFAULT_LEVEL_WIDTH/2, 7, 7, 10, 10);
+    level = createLevel(DEFAULT_LEVEL_HEIGHT+1, DEFAULT_LEVEL_WIDTH);
+    start = createRoomTemplate(0, DEFAULT_LEVEL_HEIGHT/2, DEFAULT_LEVEL_WIDTH/2, 7, 7, 10, 10);
 
     generateBranches(&start, 1, 100);
 
@@ -91,15 +105,28 @@ main(int argc, char **argv)
         addPath(level, &paths[i], '/');
     }
 
-    
-    addRoom(level, &start, '$');
+    addRoomTemplate(level, &start, '$');
     for (int i = 0; i < path_counter; i++) {
-        addRoom(level, &rooms[i], (i == n) ? 'E' : (display_depth > 0) ? rooms[i].depth + '0' : '.');
+        addRoomTemplate(level, &rooms[i], (i == n) ? 'E' : (display_depth > 0) ? rooms[i].depth + '0' : '.');
     }
 
-    FILE *f;
-    f = fopen("levels/level", "w");
-    printLevel(f, level);
+    FILE *lvf;
+    lvf = fopen("levels/level", "w");
+    printLevel(lvf, level);
+
+    FILE *inf;
+    inf = fopen("levels/info", "w");
+    fprintf(inf, "%d %d\n", DEFAULT_LEVEL_HEIGHT/2, DEFAULT_LEVEL_WIDTH/2);
+    fprintf(inf, "%d\n", item_count);
+    for (int i = 0; i < item_count; i++)
+        fprintf(inf, "%d %d %d\n", items[i][0], items[i][1], items[i][2]);
+    fprintf(inf, "%d\n", monster_count);
+    for (int i = 0; i < monster_count; i++)
+        fprintf(inf, "%d %d %d\n", monsters[i][0], monsters[i][1], monsters[i][2]);
+
+    for (int i = 0; i < DEFAULT_LEVEL_HEIGHT; i++)
+        free(level[i]);
+    free(level);
 }
 
 inline int 
@@ -111,7 +138,57 @@ randomInt(int min, int max)
 inline int
 randomPercent(int percentage)
 {
-    return ((rand() % 100) < percentage);
+    return (percentage > (rand() % 100));
+}
+
+void
+generateRandomMonsters(const int cy, const int cx, const int h, const int w, const int d)
+{
+    int r, y, x;
+    for (int m = randomInt(0, d); m > 0; m--) {
+        if (randomPercent(25 + 10 * d)) {
+            r = 23;
+            y = cy - h/2 + randomInt(1, h-2);
+            x = cx - w/2 + randomInt(1, w-2);
+            createMonster(y, x, r);
+        }
+    }
+}
+
+void
+generateRandomItems(const int cy, const int cx, const int h, const int w, const int d)
+{
+    int r, y, x;
+    for (int i = randomInt(0, d); i > 0; i--) {
+        if (randomPercent(25 + 5 * d)) {
+            r = randomInt(1, ITEM_COUNT-1);
+            y = randomInt(-(h-2)/2, (h-2)/2) + cy;
+            x = randomInt(-(w-2)/2, (w-2)/2) + cx;
+            createItem(y, x, r);
+        }
+    }
+}
+
+int
+createMonster(const int y, const int x, const int r)
+{
+    if (monster_count >= MAX_MONSTERS)
+        return 0;
+    monsters[monster_count][0] = y;
+    monsters[monster_count][1] = x;
+    monsters[monster_count][2] = r;
+    return monster_count++;
+}
+
+int
+createItem(const int y, const int x, const int r)
+{
+    if (item_count >= MAX_ITEMS)
+        return 0;
+    items[item_count][0] = y;
+    items[item_count][1] = x;
+    items[item_count][2] = r;
+    return item_count++;
 }
 
 char **
@@ -172,11 +249,6 @@ createPath(int starty, int startx, int endy, int endx)
         }
     }
 
-    // for (len = 0; len < ((dy > dx) ? ROOM_MAX_HEIGHT+1 : ROOM_MAX_WIDTH+1); len++) {
-    //     dirs[len][0] = (y += (dy > dx) ? diry : 0   );
-    //     dirs[len][1] = (x += (dy > dx) ? 0    : dirx);
-    // }
-
     dy = abs(y - endy);
     while (dy != 0) {
         dirs[len][0] = (y += diry);
@@ -198,19 +270,18 @@ createPath(int starty, int startx, int endy, int endx)
     return (Path) {.starty = starty, .startx = startx, .endy = endy, .endx = endx, .length = len, .dirs = dirs};
 }
 
-inline Room 
-createRoom(int d, int cy, int cx, int minh, int maxh, int minw, int maxw)
+inline RoomTemplate 
+createRoomTemplate(int d, int cy, int cx, int minh, int maxh, int minw, int maxw)
 {
     int h, w;
     h = randomInt(minh, maxh);
     w = randomInt(minw, maxw);
-    return (Room) {.centery = cy, .centerx = cx, .height = h, .width = w, .starty = cy - h/2, .startx = cx - w/2, .depth = d};
+    return (RoomTemplate) {.centery = cy, .centerx = cx, .height = h, .width = w, .starty = cy - h/2, .startx = cx - w/2, .depth = d};
 }
 
 void
-generateBranches(Room *room, int depth, int chance)
+generateBranches(RoomTemplate *room, int depth, int chance)
 {
-    
 // ! DIAGONALS =======
     // if (path_counter < max_branches && generateRandomBranch(&paths[path_counter], &rooms[path_counter], chance, room->centery, room->centerx, 
     //                             ROOM_MIN_DELTA_Y, ROOM_MAX_DELTA_Y, ROOM_MIN_DELTA_X, ROOM_MAX_DELTA_X, 
@@ -288,11 +359,11 @@ generateBranches(Room *room, int depth, int chance)
 }
 
 int 
-generateRandomBranch(Path *path, Room *room, int chance, int cy, int cx, int mindy, int maxdy, int mindx, int maxdx, int minh, int maxh, int minw, int maxw, int depth)
+generateRandomBranch(Path *path, RoomTemplate *room, int chance, int cy, int cx, int mindy, int maxdy, int mindx, int maxdx, int minh, int maxh, int minw, int maxw, int depth)
 {
     if (randomPercent(chance) == 0)
         return 0;
-    Room r;
+    RoomTemplate r;
     Path p;
 
     int dy, dx;
@@ -302,7 +373,7 @@ generateRandomBranch(Path *path, Room *room, int chance, int cy, int cx, int min
     cx += dx;
     
     p = createPath(cy-dy, cx-dx, cy, cx);
-    r = createRoom(depth, cy, cx, minh, maxh, minw, maxw);
+    r = createRoomTemplate(depth, cy, cx, minh, maxh, minw, maxw);
     
     if (AABB(r))
         return 0;
@@ -312,12 +383,14 @@ generateRandomBranch(Path *path, Room *room, int chance, int cy, int cx, int min
         return 0;
     *path = p;
     *room = r;
+    generateRandomMonsters(r.centery, r.centerx, r.height, r.width, r.depth);
+    generateRandomItems(r.centery, r.centerx, r.height, r.width, r.depth);
         
     return 1;
 }
 
 int
-AABB(Room room)
+AABB(RoomTemplate room)
 {
     if (rectCollision(room.starty-3, room.height+3, start.starty-3, start.height+3, room.startx-3, room.width+3, start.startx-3, start.width+3))
         return 1;
@@ -334,7 +407,7 @@ rectCollision(int t1, int h1, int t2, int h2, int l1, int w1, int l2, int w2)
 }
 
 inline void 
-addRoom(char **level, const Room *room, char c)
+addRoomTemplate(char **level, const RoomTemplate *room, char c)
 {
     int i = 0;
     for (int j = 0; j < room->width; j++)
@@ -376,7 +449,7 @@ printPath(Path path)
 }
 
 inline void 
-printRoom(Room room)
+printRoomTemplate(RoomTemplate room)
 {
     printf("dimensions: (%d %d) to (%d %d)\ncenter: (%d %d)\nwidth: %d\theight: %d\n", room.starty, room.startx, room.starty + room.height, room.startx + room.width, room.centery, room.centerx,  room.width, room.height);
 }

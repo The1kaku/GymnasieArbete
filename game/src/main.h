@@ -4,7 +4,7 @@
 #include "level.h"
 #include "actor.h"
 
-#define MONSTER_COUNT 10
+#define MONSTER_COUNT 100
 #define ITEM_COUNT 100
 
 Level level;

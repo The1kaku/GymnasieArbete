@@ -39,7 +39,7 @@ allocItem(Item *i)
     }
 }
 
-const int
+int
 getItemCap(const ItemID id, const unsigned CAP_ID)
 {
     if (id >= databaseIndex)

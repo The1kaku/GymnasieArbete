@@ -23,6 +23,12 @@ enum DEFEND_CAPABILITIES {
     DEF_THORNS = 3,
 };
 
+enum ITEM_IDS {
+    ITEM_NULL = 0,
+    ITEM_BASIC_SWORD = 1,
+    ITEM_COUNT = 2,
+};
+
 typedef unsigned short ItemID;
 
 typedef struct GroundItem {
@@ -34,7 +40,7 @@ typedef struct GroundItem {
 void initItems(void);
 
 const char *getItemName(const ItemID id);
-const int getItemCap(const ItemID, const unsigned CAP_ID);
+int getItemCap(const ItemID, const unsigned CAP_ID);
 const int *getItemAtk(const ItemID id);
 const int *getItemDef(const ItemID id);
 

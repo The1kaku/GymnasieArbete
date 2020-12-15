@@ -25,17 +25,45 @@ main(void)
     int T = 0;
     system("levels\\levelgen\\build\\a.exe");
     level = readLevelFromFile("levels/level");  
+    
+    FILE *info = fopen("levels\\info", "r");
+    FILE *out = fopen("out", "w");
+    int y, x;
+    fscanf(info, "%d %d", &y, &x);
 
-    player = createActor( 84, 91, 20, '@', 1, 1, 0, -1, 10);
-    undead = createActor( 8, 8, 20, 'Z', 3, 0, 0, 1, 5);
-    monsters[0] = undead;
+    int ic;
+    fscanf(info, "%d", &ic);
+    for (int i = 0; i < ic && i < ITEM_COUNT; i++) {
+        int r, y, x;
+        fscanf(info, "%d %d %d", &y, &x, &r);
+        groundItems[i] = malloc(sizeof(GroundItem));
+        *(groundItems[i]) = (GroundItem) { .id = r, .y = y, .x = x };
+        if (groundItems[i] != NULL)
+            fprintf(out, "Generated a new item at: (%d %d)\n", y, x);
+        else
+            fprintf(out, "Failed to create item\n");
+    }
+    for (int i = 0; i < ic-ITEM_COUNT; i++)
+        fscanf(info, "%*d %*d %*d");
+    int mc;
+    fscanf(info, "%d\n", &mc);
+    for (int i = 0; i < mc && i < MONSTER_COUNT; i++) {
+        int r, y, x;
+        fscanf(info, "%d %d %d\n", &y, &x, &r);
+        fprintf(out, "%c will eat you alive at %d %d...\n", r + 'A', y, x);
+        monsters[i] = createActor(y, x, 20, r + 'A', 3, 0, 0, 1, 5);
+    }
+    for (int i = 0; i < mc-MONSTER_COUNT; i++)
+        fscanf(info, "%*d %*d %*d");
+
+    player = createActor( y, x, 20, '@', 1, 1, 0, -1, 10);
+    monsters[0] = createActor( y+3, x+3, 20, 'Z', 3, 0, 0, 1, 5);;
 
     if (init() < 0)
         return -1;
 
     do {
         turn++;
-        //attackActor(monsters[0], player);
         runAi(T);
         if (player->health < 1) {
             loseScreen();
@@ -120,7 +148,6 @@ updateItems(void)
                 addItem(groundItems[i]);
             }
         }
-    return;
 }
 
 static void
